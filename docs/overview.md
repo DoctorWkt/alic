@@ -6,7 +6,7 @@ This document refers to the latest version of *alic* in the *alic* journey.
 
 ## Built-in Types
 
-*(see [Part 1](../Part_01_Readme.md))*
+*(see [Part 1](../Part_01/Readme.md))*
 
 *alic* has these built-in types, where the numeric suffix indicates the size in bits:
 
