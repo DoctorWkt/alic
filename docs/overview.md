@@ -6,7 +6,7 @@ This document refers to the latest version of *alic* in the *alic* journey.
 
 ## Built-in Types
 
-*(see [Part 1](../Part_01/Readme.md))*
+*(see [Part 1](../Part_01_Readme.md))*
 
 *alic* has these built-in types, where the numeric suffix indicates the size in bits:
 
@@ -106,7 +106,7 @@ This differs from C where you can name several parameters and put the ellipsis a
 
 ## Header Files
 
-The *alic* compiler invokes the C-preprocessor on the input files, so you can include header files in your programs. The [include/](../include/) directory holds a number of header files. Their suffix is `.ah` to distinguish them from C header files.
+The *alic* compiler invokes the C-preprocessor on the input files, so you can include header files in your programs. The *include* directory in each part holds a number of header files. Their suffix is `.ah` to distinguish them from C header files.
 
 ## Enums
 
@@ -253,4 +253,4 @@ You can call functions that throw exceptions in the `catch` block as well. Howev
 
 ## Example *alic* Programs
 
-In the [tests](../tests) directory there are dozens of example programs which I use to do regression testing on the compiler. Most are trivial but there are some bigger programs.
+In the *tests* directory in each part there are dozens of example programs which I use to do regression testing on the compiler. Most are trivial but there are some bigger programs.
