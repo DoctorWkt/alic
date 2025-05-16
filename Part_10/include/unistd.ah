@@ -1,0 +1,9 @@
+#ifndef _UNISTD_AH
+# define _UNISTD_AH
+
+#include <sys/types.ah>
+
+void _exit(int status);
+int unlink(char *pathname);
+
+#endif	// _UNISTD_AH
