@@ -1,0 +1,256 @@
+# Overview of *alic* and Differences from C
+
+This document refers to the latest version of *alic* in the *alic* journey.
+
+*alic* is a toy language, partly inspired by C. If I don't mention a feature here, and if you can't see it in *alic*'s [grammar definition](grammar.txt), then *alic* doesn't have the feature.
+
+## Built-in Types
+
+*(see [Part 1](../Part_01_Readme.md))*
+
+*alic* has these built-in types, where the numeric suffix indicates the size in bits:
+
+  * Signed Integer: `int8`, `int16`, `int32` and `int64`
+  * Unsigned Integer: `uint8`, `uint16`, `uint32` and `uint64`
+  * Floating Point: `flt32` and `flt64`
+  * Boolean: `bool`
+
+In terms of implicit widening:
+
+ * smaller signed integers can be widened to larger signed integers,
+ * smaller unsigned integers can be widened to larger unsigned integers,
+ * both signed and unsigned integers can be widened to either floating point type, and
+ * `bool` can be widened to any integer or floating point type: `false` is 0 and `true` is 1.
+
+However, note that `bool` is not an integer type: you can only assign `true` or `false` to a `bool` variable.
+
+There is no `void` type; this keyword is only used to show a function that returns no value and/or takes no arguments.
+
+There is a `void *` type. This is a type that can be assigned a pointer of any type, and be assigned to a pointer of any type.
+
+`NULL` is built into the *alic* language and is a `void *` pointer with the value 0.
+
+At present, *alic* does not have the ability to do type casting.
+
+## Assignment Statements
+
+Assignment statements are much like C: `variable = expression;`
+
+However, assignment statements are **not** expressions; you cannot do `a= b= c= 3;` in *alic*.
+
+## Control Statements
+
+*(see [Part 2](../Part_02/Readme.md))*
+
+*alic* has three control statements: `if`, `while` and `for`. They are much like the C equivalents. One difference is that all statement blocks much be surrounded by braces (i.e. curly brackets). In *alic*, you have to write:
+
+```
+  if (x > 5) {
+    printf("x is bigger than 5\n");
+  }
+```
+
+even if there is only one statement in the statement block, as shown above.
+
+The `for` statement is a subset of the C version. Inside the parentheses you have exactly:
+
+  * one assignment statement,
+  * one relational expression, and
+  * one assignment statement
+
+These are not optional, and you can't have more than one. Thus, you cannot write this in *alic*:
+
+```
+  for ( ; x > 5; x= x + 2, y= y * 3) { ... }
+```
+
+## Functions and Function Calling
+
+*alic*'s functions resemble C functions. A function can have zero or more arguments (use `void` when there are zero arguments), and it can return zero or one value. All arguments and return values have to be scalar, i.e. not structures.
+
+Function arguments can be expressions, so you can write:
+
+```
+  x= fred(a+2, b-3, c*d+a);
+```
+
+Argument values are evaluated from left to right.
+
+## Named Function Arguments
+
+*(see [Part 6](../Part_06/Readme.md))*
+
+*alic* differs from C in that you can name arguments to a function. For example, if a function is declared as:
+
+```
+void fred(int32 a, int32 b, flt32 c) { ... }
+```
+
+then you can call it like this:
+
+```
+  fred(c= 30.5, a= 11, b= 19);
+```
+
+If you choose to name arguments, you must name all of them.
+
+## Variadic Functions
+
+A [variadic](https://en.wikipedia.org/wiki/Variadic_function) function is indicated by an ellipsis ( `...` ) as the function's parameter list, e.g.
+
+```
+  int foobar(...) { ... }
+```
+
+This differs from C where you can name several parameters and put the ellipsis after them.
+
+## Header Files
+
+The *alic* compiler invokes the C-preprocessor on the input files, so you can include header files in your programs. The [include/](../include/) directory holds a number of header files. Their suffix is `.ah` to distinguish them from C header files.
+
+## Enums
+
+An `enum` in *alic* is **not** a type; it's just a way to give names to integer values, e.g.
+
+```
+enum { a, b, c=25, d, e= -34, f, g };
+```
+
+`a` is the constant 0, `b` is 1, `c` and `d` as shown, `f` is -33 and `g` is -32.
+
+## User-defined Types
+
+*(see [Part 8](../Part_08/Readme.md))*
+
+You can define new types in *alic* by using the `type` keyword. You can define opaque types, type aliases and structured types.
+
+## Opaque Types
+
+An opaque type has a name but no details about its size or structure, e.g.
+
+```
+type FILE;
+```
+
+The idea here is that a library that has its own type (e.g. the standard I/O library) can keep the details of the type hidden: only the existence of the type is given in a header file.
+
+While you cannot declare a variable of opaque type in an *alic* program, you can declare a pointer to the type, e.g.
+
+```
+  FILE *input_filehandle;
+```
+
+Thus, you can receive a pointer to a `FILE` from a library function, and send a pointer to a library function, but never see the internal details of the type.
+
+## Type Aliases
+
+*alic* allows type aliases, e.g.
+
+```
+type char = int8;
+type String = char *;
+```
+
+## Structured Types
+
+*(see [Part 9](../Part_09/Readme.md))*
+
+*alic* has structured types. One difference from C is that the list of members of a struct are separated by commas, not semicolons. Another difference is that unions can only be declared inside a struct, and the union itself has no name. Here is an example:
+
+```
+type FOO = struct {
+  int32 a,
+  flt32 b,
+  union { flt64 x, int16 y, bool z },
+  bool c
+};
+```
+
+If you now declare a variable, then you can do this:
+
+```
+  FOO var;
+
+  var.a = 5;
+  var.x = 3.2;
+  var.c = true;
+```
+
+## Pointers
+
+*alic* has pointers which are declared using the normal C syntax. The `&` operator gets the address of a variable, and the `*` operator dereferences a pointer to get the value that it points at.
+
+The C syntax for accessing a struct's member through a pointer is the '`->`' operator. This does **not** exist in *alic*. You can use the '.' operator instead.
+
+Consider the `FOO var` variable above. Let's take a pointer to it:
+
+```
+  FOO var;
+  FOO *ptr;
+
+  ptr= &var;      // Get a pointer to var
+
+  var.a= 5;       // Set one of the var member values
+
+                  // Access the same member through the pointer
+  printf("We can print out %d\n", ptr.a);
+```
+
+## Exceptions and Exception Handling
+
+*(see [Part 10](../Part_10/Readme.md))*
+
+In *alic*, functions can throw [exceptions](https://en.wikipedia.org/wiki/Exception_handling), and there is a syntax to catch an exception and deal with it.
+
+A function is declared to throw an exception using the `throws` extension to the declaration, e.g.
+
+```
+void *Malloc(size_t size) throws Exception *e { ... }
+```
+
+`e` is a pointer to the variable which will be sent back to the caller; in the above example it is of type `Exception` (see the `except.ah` header file). You don't have to use the `Exception` type, but there is one requirement for the type that can be used: it must be a struct with an `int32` as the first member of the type.
+
+A function which throws an exception receives a pointer to a suitable exception variable from the caller, as shown above. The `int32` first member is zeroed when the function is called. When the function wants to throw an exception, it must set the first member to be non-zero and then use the `abort` keyword to end the function and return to the caller, e.g.
+
+```
+void *Malloc(size_t size) throws Exception *e {
+  void *ptr= malloc(size);         // Try to malloc() the area
+  if (ptr == NULL) {               // It failed
+     e.errno= ENOMEM;              // Set the int32 error to ENOMEM
+     abort;                        // and throw the exception
+  }
+  return(ptr);                     // Otherwise return the valid pointer
+}
+```
+
+You cannot call a function that throws an exception unless you catch it. The syntax to call a function and catch any exception is:
+
+```
+   try(exception variable) { block of code which calls the function }
+   catch { block of code which is invoked if an exception occurs }
+```
+
+For example:
+
+```
+  Exception foo;
+  int8 *list;
+  ...
+  try(foo) {
+    list= Malloc(23);
+  }
+  catch {
+    fprintf(stderr, "Could not allocate memory, error %d\n", foo.errno);
+    exit(1);
+  }
+```
+
+The two blocks of code are normal statement blocks, so you can have dozens of statements (including `if`, `while`, `for`s) and many function calls in the blocks.
+
+If any function in the `try` block throws an exception, the exception variable has its first member set (by the called function) non-zero and execution jumps immediately to the `catch` block. This is done *before* any assignment of the function's return value. Above, the `list` variable won't be touched if the `Malloc()` returns an exception.
+
+You can call functions that throw exceptions in the `catch` block as well. However, nothing will happen to the flow of execution in the `catch` block. All that will happen is that your exception variable will be altered by the function that threw the exception.
+
+## Example *alic* Programs
+
+In the [tests](../tests) directory there are dozens of example programs which I use to do regression testing on the compiler. Most are trivial but there are some bigger programs.

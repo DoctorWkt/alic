@@ -1,0 +1,181 @@
+# The leg parser for the alic language.
+# (c) 2025 Warren Toomey, GPL3
+
+%{
+#include <stdio.h>
+#include <stdlib.h>
+#include "alic.h"
+#include "proto.h"
+
+#define YYSTYPE ASTnode *
+
+extern uint Line;
+extern Type *ty_void;
+extern Type *ty_bool;
+extern Type *ty_int8;
+extern Type *ty_int16;
+extern Type *ty_int32;
+extern Type *ty_int64;
+extern Type *ty_uint8;
+extern Type *ty_uint16;
+extern Type *ty_uint32;
+extern Type *ty_uint64;
+extern Type *ty_flt32;
+extern Type *ty_flt64;
+
+extern FILE *debugfh;
+
+char *symname=NULL;
+char *varname=NULL;
+static Type *ty;
+%}
+
+# Statements
+#
+statements = statement+ EOF
+
+statement = print_stmt
+	  | declaration_stmt
+	  | assign_stmt
+	  | . { fatal("syntax error\n"); }
+
+print_stmt = PRINT e:expression SEMI
+	{
+	  print_statement(e);
+	}
+
+declaration_stmt = type SYMBOL { varname= strdup(symname); }
+						ASSIGN e:expression SEMI
+	{
+	  declaration_statement(varname, e, ty);
+	}
+
+assign_stmt = v:variable ASSIGN e:expression SEMI
+	{
+	  assignment_statement(v, e);
+	}
+
+# Expressions
+#
+expression = bitwise_expression
+
+bitwise_expression = 
+	( INVERT l:relational_expression	{ l  = unarop(l, A_INVERT); }
+	| l:relational_expression
+	)
+	( AND r:relational_expression		{ l  = binop(l,r,A_AND); }
+	| OR  r:relational_expression		{ l  = binop(l,r,A_OR);  }
+	| XOR r:relational_expression		{ l  = binop(l,r,A_XOR); }
+	)* -					{ $$ = l; }
+
+relational_expression =
+	( NOT l:shift_expression		{ l  = unarop(l, A_NOT); }
+	| l:shift_expression
+	)
+	( GE r:shift_expression			{ l  = binop(l,r,A_GE); }
+	| GT r:shift_expression			{ l  = binop(l,r,A_GT); }
+	| LE r:shift_expression			{ l  = binop(l,r,A_LE); }
+	| LT r:shift_expression			{ l  = binop(l,r,A_LT); }
+	| EQ r:shift_expression			{ l  = binop(l,r,A_EQ); }
+	| NE r:shift_expression			{ l  = binop(l,r,A_NE); }
+	)* -					{ $$ = l; }
+
+shift_expression = l:additive_expression
+	( LSHIFT r:additive_expression		{ l  = binop(l,r,A_LSHIFT); }
+	| RSHIFT r:additive_expression		{ l  = binop(l,r,A_RSHIFT); }
+	)* -					{ $$ = l; }
+
+additive_expression =
+	( PLUS? l:multiplicative_expression
+        | MINUS l:multiplicative_expression	{ l  = unarop(l, A_NEGATE); }
+	)
+        ( PLUS  r:multiplicative_expression	{ l  = binop(l,r,A_ADD); }
+        | MINUS r:multiplicative_expression	{ l  = binop(l,r,A_SUBTRACT); }
+        )* -					{ $$ = l; }
+
+multiplicative_expression = l:factor
+	( STAR  r:factor 			{ l  = binop(l,r,A_MULTIPLY); }
+	| SLASH r:factor 			{ l  = binop(l,r,A_DIVIDE); }
+	)* -					{ $$ = l; }
+
+factor =  f:FLTLIT 				{ $$ = f; }
+	| f:INTLIT				{ $$ = f; }
+	| TRUE					{ $$ = mkastleaf(A_NUMLIT,
+						  ty_bool, true, NULL, 1); }
+	| FALSE					{ $$ = mkastleaf(A_NUMLIT,
+						  ty_bool, true, NULL, 0); }
+	| v:variable				{ $$ = v; }
+
+# Types
+#
+type =    "int8"   -			{ ty= ty_int8;   }
+	| "int16"  -			{ ty= ty_int16;  }
+	| "int32"  -			{ ty= ty_int32;  }
+	| "int64"  -			{ ty= ty_int64;  }
+	| "uint8"  -			{ ty= ty_uint8;  }
+	| "uint16" -			{ ty= ty_uint16; }
+	| "uint32" -			{ ty= ty_uint32; }
+	| "uint64" -			{ ty= ty_uint64; }
+	| "flt32"  -			{ ty= ty_flt32;  }
+	| "flt64"  -			{ ty= ty_flt64;  }
+	| "bool"   -			{ ty= ty_bool;   }
+	| SYMBOL   -			{ fatal("unknown type %s\n", symname); }
+
+# Variables, symbols, literals
+#
+variable = SYMBOL	
+	{
+	  Sym *s= find_symbol(symname);
+	  if (s == NULL)
+	    fatal("Unknown variable %s\n", symname);
+	  $$ = mkastleaf(A_IDENT, s->type, true, s, 0);
+	}
+
+SYMBOL = < [A-Za-z_]+ [A-Za-z0-9_]* > -	{ symname= strdup(yytext); }
+
+FLTLIT = < '-'? DIGIT+ '.' DIGIT+ > -
+	{ Type *littype;
+	  uint64_t val= parse_litval(yytext, &littype);
+	  $$ = mkastleaf(A_NUMLIT, littype, true, NULL, val);
+	}
+
+INTLIT = < '-'? DIGIT+ > -
+	{ Type *littype;
+	  uint64_t val= parse_litval(yytext, &littype);
+	  $$ = mkastleaf(A_NUMLIT, littype, true, NULL, val);
+	}
+DIGIT = [0-9]
+
+# Operators
+#
+SLASH  = '/'  -
+STAR   = '*'  -
+MINUS  = '-'  -
+PLUS   = '+'  -
+SEMI   = ';'  -
+ASSIGN = '='  -
+GT     = '>'  -
+GE     = '>=' -
+LT     = '<'  -
+LE     = '<=' -
+EQ     = '==' -
+NE     = '!=' -
+INVERT = '~'  -
+NOT    = '!'  -
+AND    = '&'  -
+OR     = '|'  -
+XOR    = '^'  -
+LSHIFT = '<<' -
+RSHIFT = '>>' -
+
+# Keywords
+#
+PRINT  = "print" -
+TRUE   = 'true' -
+FALSE  = 'false' -
+
+# Whitespace and end of file
+#
+EOF = !.
+CR  = ( '\n' | '\r' | '\r\n' )		{ Line++; }
+-   = ( CR   | ' '  | '\t'   )*

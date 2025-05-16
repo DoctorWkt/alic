@@ -1,0 +1,147 @@
+input_file= ( type_declaration
+            | enum_declaration
+            | global_var_declaration
+            | function_declaration
+            )* EOF
+
+type_declaration= TYPE IDENT SEMI
+                | TYPE IDENT ASSIGN type SEMI
+                | TYPE IDENT ASSIGN struct_declaration SEMI
+
+enum_declaration= ENUM LBRACE enum_list RBRACE SEMI
+
+enum_list= enum_item (COMMA enum_item)*
+
+enum_item= IDENT
+         | IDENT ASSIGN NUMLIT
+
+struct_declaration= STRUCT LBRACE struct_list RBRACE
+
+struct_list= struct_item (COMMA struct_item)*
+
+struct_item= typed_declaration
+           | union_declaration
+
+union_declaration= UNION LBRACE typed_declaration_list RBRACE
+
+global_var_declaration= typed_declaration SEMI;
+
+function_declaration= function_prototype statement_block
+                    | function_prototype SEMI
+
+function_prototype= (typed_declaration LPAREN typed_declaration_list RPAREN
+                    | typed_declaration LPAREN VOID RPAREN
+                    | typed_declaration LPAREN ELLIPSIS RPAREN
+                    ) (THROWS typed_declaration )?
+
+typed_declaration_list= typed_declaration (COMMA typed_declaration_list)*
+
+typed_declaration= type IDENT
+
+type= (builtin_type | user_defined_type) STAR*
+
+builtin_type= 'void'  | 'bool'
+            | 'int8'  | 'int16'  | 'int32'  | 'int64'
+            | 'uint8' | 'uint16' | 'uint32' | 'uint64'
+            | 'flt32' | 'flt64'
+
+user_defined_type= IDENT
+
+statement_block= LBRACE declaration_stmts procedural_stmts RBRACE
+
+declaration_stmts= ( typed_declaration ASSIGN expression SEMI
+                   | typed_declaration SEMI
+                   )*
+
+procedural_stmts= ( assign_stmt
+                  | if_stmt
+                  | while_stmt
+                  | for_stmt
+                  | return_stmt
+                  | abort_stmt
+                  | try_stmt
+                  | function_call SEMI
+                  )*
+
+assign_stmt= short_assign_stmt SEMI
+
+short_assign_stmt= variable ASSIGN expression
+
+if_stmt= IF LPAREN relational_expression RPAREN statement_block
+         (ELSE statement_block)?
+
+while_stmt= WHILE LPAREN relational_expression RPAREN statement_block
+
+for_stmt= FOR LPAREN assign_stmt relational_expression SEMI
+          short_assign_stmt RPAREN statement_block
+
+return_stmt= RETURN LPAREN expression RPAREN SEMI
+           | RETURN SEMI
+
+abort_stmt= ABORT SEMI
+
+try_statement= TRY LPAREN IDENT RPAREN statement_block CATCH statement_block
+
+function_call= IDENT LPAREN expression_list? RPAREN
+             | IDENT LPAREN named_expression_list RPAREN
+
+expression_list= expression (COMMA expression_list)*
+
+named_expression_list= IDENT ASSIGN expression
+                       (COMMA named_expression_list)*
+
+expression= bitwise_expression
+
+bitwise_expression= ( INVERT relational_expression
+                    |        relational_expression
+                    )
+                    ( AND relational_expression
+                    | OR  relational_expression
+                    | XOR relational_expression
+                    )*
+
+relational_expression= ( NOT shift_expression
+                       |     shift_expression
+                       )
+                       ( GE shift_expression
+                       | GT shift_expression
+                       | LE shift_expression
+                       | LT shift_expression
+                       | EQ shift_expression
+                       | NE shift_expression
+                       )?
+
+shift_expression= additive_expression
+                ( LSHIFT additive_expression
+                | RSHIFT additive_expression
+                )*
+
+additive_expression= ( PLUS? multiplicative_expression
+                     | MINUS multiplicative_expression
+                     )
+                     ( PLUS  multiplicative_expression
+                     | MINUS multiplicative_expression
+                     )*
+
+multiplicative_expression= unary_expression
+                         ( STAR  unary_expression
+                         | SLASH unary_expression
+                         )*
+
+unary_expression= primary_expression
+                | STAR unary_expression
+                | AMPER primary_expression
+
+primary_expression= NUMLIT
+                  | STRLIT
+                  | TRUE
+                  | FALSE
+                  | NULL
+                  | variable
+                  | ENUMVAL
+                  | function_call
+
+variable= IDENT
+        | STAR IDENT
+        | IDENT DOT IDENT
+

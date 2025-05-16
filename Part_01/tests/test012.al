@@ -1,0 +1,14 @@
+bool fred = true;
+bool jim = false;
+print fred;
+print jim;
+jim = 3 > 2;
+print jim;
+bool mary = 17 != 14;
+print mary;
+int32 x = mary;
+print x;
+int32 y = false;
+print y;
+bool dave = fred;
+print dave;
