@@ -264,6 +264,8 @@ You can call functions that throw exceptions in the `catch` block as well. Howev
 
 ## Switch Statements
 
+*(see [Part 11](../Part_11/Readme.md))*
+
 These look the same as C switch statements, but there is a **big** difference: cases do not fall through to the next case; instead, they jump to the end of the switch statement. If you want to fall through to the next case, you need to use the `fallthru` keyword. Also, the `break` statement is **not** used in a switch statement; it is only used for loops.
 
 Here is an example *alic* program that demonstrates the switch statement:
@@ -273,16 +275,16 @@ Here is an example *alic* program that demonstrates the switch statement:
 void main(void) {
   int32 x;
 
-  for (x=1; x <= 9; x= x + 1) {
+  for (x=1; x <= 9; x++) {
     switch(x) {
       case  3: printf("case 3\n");                        // Only prints 3
       case  4:
       case  5:
       case  6: printf("case %d\n",x);                     // 4 and 5 fall through to 7
-	           if (x < 6) {
-      	         printf("fallthru to ...\n");
-	             fallthru;                                // because of this line
-	           }
+               if (x < 6) {
+                 printf("fallthru to ...\n");
+                 fallthru;                                // because of this line
+               }
                printf("case 6 does not fall through!\n");
       case  7: printf("case 7\n");                        // Only prints 7
       default: printf("case %d, default\n", x);
