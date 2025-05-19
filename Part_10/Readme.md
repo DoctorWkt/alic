@@ -117,7 +117,7 @@ Obviously, there could be many function calls in the `try` clause which could th
 
 ## New Keywords!
 
-We have four new keywords: `try`, `catch`, `throws` and `abort`. See [lexer.c](lexer.c) fot the changes.
+We have four new keywords: `try`, `catch`, `throws` and `abort`. See [lexer.c](lexer.c) for the changes.
 
 ## Changes to the *alic* Grammar
 

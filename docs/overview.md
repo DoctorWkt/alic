@@ -38,6 +38,13 @@ Assignment statements are much like C: `variable = expression;`
 
 However, assignment statements are **not** expressions; you cannot do `a= b= c= 3;` in *alic*.
 
+Similarly, *alic* has post-increment and post-decrement **statements** (not expressions):
+
+```
+   fred++;
+   jim--;
+```
+
 ## Control Statements
 
 *(see [Part 2](../Part_02/Readme.md))*
@@ -52,17 +59,11 @@ However, assignment statements are **not** expressions; you cannot do `a= b= c= 
 
 even if there is only one statement in the statement block, as shown above.
 
-The `for` statement is a subset of the C version. Inside the parentheses you have exactly:
+With `while` and `for` loops, the condition has to be a relational expression (i.e. a comparison) or the constant `true`. You can't say `while(1)` but you can say `while(true)`.
 
-  * one assignment statement,
-  * one relational expression, and
-  * one assignment statement
+The three sections of the `for` loop are optional. If the middle condition is missing, it is treated as being `true`.
 
-These are not optional, and you can't have more than one. Thus, you cannot write this in *alic*:
-
-```
-  for ( ; x > 5; x= x + 2, y= y * 3) { ... }
-```
+You can use `break` and `continue` in loops, just as you can in C.
 
 ## Functions and Function Calling
 
@@ -196,6 +197,16 @@ Consider the `FOO var` variable above. Let's take a pointer to it:
   printf("We can print out %d\n", ptr.a);
 ```
 
+## Array Access with Pointers
+
+You can use a pointer as the base of an array:
+
+```
+  int32 *ptr= malloc(100 * sizeof(int32));
+  ptr[5]= 23;
+  printf("%d\n", ptr[5]);
+```
+
 ## Exceptions and Exception Handling
 
 *(see [Part 10](../Part_10/Readme.md))*
@@ -250,6 +261,35 @@ The two blocks of code are normal statement blocks, so you can have dozens of st
 If any function in the `try` block throws an exception, the exception variable has its first member set (by the called function) non-zero and execution jumps immediately to the `catch` block. This is done *before* any assignment of the function's return value. Above, the `list` variable won't be touched if the `Malloc()` returns an exception.
 
 You can call functions that throw exceptions in the `catch` block as well. However, nothing will happen to the flow of execution in the `catch` block. All that will happen is that your exception variable will be altered by the function that threw the exception.
+
+## Switch Statements
+
+These look the same as C switch statements, but there is a **big** difference: cases do not fall through to the next case; instead, they jump to the end of the switch statement. If you want to fall through to the next case, you need to use the `fallthru` keyword. Also, the `break` statement is **not** used in a switch statement; it is only used for loops.
+
+Here is an example *alic* program that demonstrates the switch statement:
+
+
+```
+void main(void) {
+  int32 x;
+
+  for (x=1; x <= 9; x= x + 1) {
+    switch(x) {
+      case  3: printf("case 3\n");                        // Only prints 3
+      case  4:
+      case  5:
+      case  6: printf("case %d\n",x);                     // 4 and 5 fall through to 7
+	           if (x < 6) {
+      	         printf("fallthru to ...\n");
+	             fallthru;                                // because of this line
+	           }
+               printf("case 6 does not fall through!\n");
+      case  7: printf("case 7\n");                        // Only prints 7
+      default: printf("case %d, default\n", x);
+    }
+  }
+}
+```
 
 ## Example *alic* Programs
 

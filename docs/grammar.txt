@@ -48,6 +48,7 @@ builtin_type= 'void'  | 'bool'
 user_defined_type= IDENT
 
 statement_block= LBRACE declaration_stmts procedural_stmts RBRACE
+               | procedural_stmt
 
 declaration_stmts= ( typed_declaration ASSIGN expression SEMI
                    | typed_declaration SEMI
@@ -59,28 +60,53 @@ procedural_stmts= ( assign_stmt
                   | for_stmt
                   | return_stmt
                   | abort_stmt
+                  | break_stmt
+                  | continue_stmt
                   | try_stmt
+                  | switch_stmt
+                  | fallthru_stmt
                   | function_call SEMI
                   )*
 
 assign_stmt= short_assign_stmt SEMI
 
-short_assign_stmt= variable ASSIGN expression
+short_assign_stmt= postfix_variable ASSIGN expression
+                 | postfix_variable POSTINC
+                 | postfix_variable POSTDEC
 
-if_stmt= IF LPAREN relational_expression RPAREN statement_block
+
+if_stmt= IF LPAREN boolean_expression RPAREN statement_block
          (ELSE statement_block)?
 
-while_stmt= WHILE LPAREN relational_expression RPAREN statement_block
+while_stmt= WHILE LPAREN boolean_expression RPAREN statement_block
+          | WHILE LPAREN TRUE RPAREN statement_block
 
-for_stmt= FOR LPAREN assign_stmt relational_expression SEMI
-          short_assign_stmt RPAREN statement_block
+for_stmt= FOR LPAREN short_assign_stmt? SEMI
+                     boolean_expression? SEMI
+                     short_assign_stmt? RPAREN statement_block
 
 return_stmt= RETURN LPAREN expression RPAREN SEMI
            | RETURN SEMI
 
 abort_stmt= ABORT SEMI
 
+break_stmt= BREAK SEMI
+
+continue_stmt= CONTINUE SEMI
+
 try_statement= TRY LPAREN IDENT RPAREN statement_block CATCH statement_block
+
+switch_stmt= SWITCH LPAREN expression RPAREN switch_stmt_block
+
+switch_stmt_block= (case_stmt
+                   |default_stmt
+                   )+
+
+case_stmt= CASE expression COLON procedural_stmts?
+
+default_stmt= DEFAULT COLON procedural_stmts
+
+fallthru_stmt= FALLTHRU SEMI
 
 function_call= IDENT LPAREN expression_list? RPAREN
              | IDENT LPAREN named_expression_list RPAREN
@@ -92,13 +118,21 @@ named_expression_list= IDENT ASSIGN expression
 
 expression= bitwise_expression
 
-bitwise_expression= ( INVERT relational_expression
-                    |        relational_expression
+bitwise_expression= ( INVERT boolean_expression
+                    |        boolean_expression
                     )
-                    ( AND relational_expression
-                    | OR  relational_expression
-                    | XOR relational_expression
+                    ( AND boolean_expression
+                    | OR  boolean_expression
+                    | XOR boolean_expression
                     )*
+
+boolean_expression= logical_and_expression
+
+logical_and_expression= logical_or_expression
+                      | logical_or_expression LOGAND logical_or_expression
+
+logical_or_expression= relational_expression
+                     | relational_expression LOGOR relational_expression
 
 relational_expression= ( NOT shift_expression
                        |     shift_expression
@@ -126,6 +160,7 @@ additive_expression= ( PLUS? multiplicative_expression
 multiplicative_expression= unary_expression
                          ( STAR  unary_expression
                          | SLASH unary_expression
+                         | MOD unary_expression
                          )*
 
 unary_expression= primary_expression
@@ -137,11 +172,17 @@ primary_expression= NUMLIT
                   | TRUE
                   | FALSE
                   | NULL
-                  | variable
                   | ENUMVAL
+                  | sizeof_expression
+                  | postfix_variable
                   | function_call
+                  | LPAREN expression RPAREN
+
+sizeof_expression= SIZEOF LPAREN type RPAREN
+
+postfix_variable= IDENT
+                | postfix_variable DOT IDENT
+                | postfix_variable LBRACKET expression RBRACKET
 
 variable= IDENT
-        | STAR IDENT
-        | IDENT DOT IDENT
 

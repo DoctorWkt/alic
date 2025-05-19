@@ -28,8 +28,10 @@ Here are the parts of the *alic* journey so far:
   * [Part 8](Part_08/Readme.md): Opaque Types, Type Aliases, Enumerated Values
   * [Part 9](Part_09/Readme.md): Adding Structs and Unions
   * [Part 10](Part_10/Readme.md): Adding Exceptions
+  * [Part 11](Part_11/Readme.md): More C Features
 
 If you just want to see the language features in *alic* which make it
 different than C, then you can check out these parts:
 [Part 6](Part_06/Readme.md), [Part 8](Part_08/Readme.md),
-[Part 9](Part_09/Readme.md), [Part 10](Part_10/Readme.md).
+[Part 9](Part_09/Readme.md), [Part 10](Part_10/Readme.md),
+[Part 11 (Switch Statements)](Part_11/Readme.md).
