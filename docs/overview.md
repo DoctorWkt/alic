@@ -32,6 +32,26 @@ There is a `void *` type. This is a type that can be assigned a pointer of any t
 
 At present, *alic* does not have the ability to do type casting.
 
+## Operators and Precedence
+
+Here is the list of operators in *alic* and their precedence.
+
+
+| Operator                      | Description                                                  |
+|-------------------------------|--------------------------------------------------------------|
+| `.` `[]`                      | Struct member access (also via pointer), array element access|
+|  `()`                         | Parentheses, function call                                   |
+|  `&` `*`                      | Address of, value at                                         |
+|`*` `/` `%`                    | Multiply, divide, modulo                                     |
+|  `+` `-`                      | Plus, minus                                                  |
+| `<<` `>>`                     | Left shift, right shift                                      |
+|`!` `==` `!=` `>` `>=` `<` `<=`| Logical not, comparison operators                            |
+|       `||`                    | Logical OR                                         |
+|        `&&`                   | Logical AND                                                  |
+|   `~` `&` `|` `^`             | Bitwise NOT, AND, OR, XOR                          |
+|            `?:`               | Ternary operator                                             |
+
+
 ## Assignment Statements
 
 Assignment statements are much like C: `variable = expression;`
