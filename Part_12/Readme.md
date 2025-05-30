@@ -24,7 +24,7 @@ printf("fred.x.y[25].z is %f\n", fred.x.y[25].z);
 
 ## Initialising Arrays and the Syntax for Array Declarations
 
-It makes sense to allow programmers to initialise the element values of arrays as well as the member values for structs. At the same time, I want to minimise the undefined behaviour in *alic*; to that end, if variables are not intialised, their contents need to be set to all-zero bits.
+It makes sense to allow programmers to initialise the element values of arrays as well as the member values for structs. At the same time, I want to minimise the undefined behaviour in *alic*; to that end, if variables are not initialised, their contents need to be set to all-zero bits.
 
 While I was working on this part of the *alic* journey, I thought I could just enforce that every array declaration must have an initialisation list, e.g.
 
@@ -257,7 +257,7 @@ We still check if the variable hasn't already been declared, then add it to the 
 
 After that, if the `ASTnode` holding the declaration has a count (i.e. it's an array), we copy this count into the new symbol.
 
-After this, if we see a `=` token, we must have an intial value or set of values. We call `decl_initialisation()` to get an `ASTnode` tree that holds this. Now it gets interesting. We have to walk this tree to a) output these values to the QBE file and b) check that we have the correct count of them and that their type matches the array/struct member they belong to.
+After this, if we see a `=` token, we must have an initial value or set of values. We call `decl_initialisation()` to get an `ASTnode` tree that holds this. Now it gets interesting. We have to walk this tree to a) output these values to the QBE file and b) check that we have the correct count of them and that their type matches the array/struct member they belong to.
 
 Here are the essential bits of code:
 
@@ -267,7 +267,7 @@ Here are the essential bits of code:
     init= decl_initialisation();
 
     if (sym->visibility == SV_EXTERN)
-      fatal("cannot intiialise an external variable\n");
+      fatal("cannot initialise an external variable\n");
 
     // Start the output of the variable.
     cgglobsym(sym, false);
