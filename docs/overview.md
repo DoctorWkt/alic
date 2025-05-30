@@ -109,6 +109,14 @@ This differs from C where you can name several parameters and put the ellipsis a
 
 The *alic* compiler invokes the C-preprocessor on the input files, so you can include header files in your programs. The *include* directory in each part holds a number of header files. Their suffix is `.ah` to distinguish them from C header files.
 
+## Symbol Visibility
+
+*alic* has two keywords which affect the visibility of a symbol outside a function: `extern` and `public`. `extern` means the same as it does in C: a symbol is defined in another file. The `public` keyword indicates that a non-local symbol (e.g. a function or variable) should be made visible to other files.
+
+By default, functions and non-local variables are marked as *not* visible to other files: they are, thus, private to the file being compiled.
+
+The aim here is to make it easier for a programmer to prevent "leakage" of symbol names. If you want a function or variable to be visible, you now have to mark it as `public`.
+
 ## Enums
 
 An `enum` in *alic* is **not** a type; it's just a way to give names to integer values, e.g.
@@ -205,6 +213,75 @@ You can use a pointer as the base of an array:
   int32 *ptr= malloc(100 * sizeof(int32));
   ptr[5]= 23;
   printf("%d\n", ptr[5]);
+```
+
+## Arrays
+
+In *alic*, when you declare an array, you *must* give the number of elements, e.g.
+
+```
+int32 fred[5];
+int16 jim[12]= { <list of values> };
+extern flt32 list[10];
+```
+
+You must give the number of elements even for `extern` array declarations.
+
+*alic* allows you to have arrays of structs, structs with array members and structs with struct members.
+
+You can't define a type as being an array, i.e. this is not permitted:
+
+```
+type FOO = int32 fred[5];
+```
+
+## Array Bounds Checking
+
+By default, an access into an array will be bounds checked. If the index is below zero, or greater than or equal to the number of elements, the program will print an error message and `exit(1)`. You can disable this by using the `-B` compiler command-line option.
+
+If you use array access via a pointer, there is no bounds checking.
+
+## Initialising Variables
+
+For non-local variables, including arrays and structs, you can provide either a single value known at compile time, or a `{` ... `}` list of values separated by commas. If you have nested data structures, you can nest `{` ... `}`. For example:
+
+```
+type FOO= struct {
+  int32 a,
+  bool  b,
+  flt32 c
+};
+
+FOO dave= { 13, true, 23.5 };
+
+FOO fred[3]= {
+        { 1, true,  1.2 },
+        { 2, false, 4.5 },
+        { 3, true,  6.7 }
+};
+```
+
+For local variables, *alic* only lets you initialise scalar variables, i.e. not structs and not arrays. You can use expressions that will be evaluated at run-time. For example:
+
+```
+void main(void) {
+  int32 x= 3;
+  int32 y= x * 4;
+  FOO   fred;      // Cannot initialise this
+}
+```
+
+To reduce any undefined behaviour, any variable declaration (local or non-local) without an initialisation expression will be filled with zero bits.
+
+### sizeof()
+
+`sizeof()` is fairly similar to the C version. You can get the size of a type and the size of a variable. However, if the variable is an array, then you get the number of elements in the array. For example:
+
+```
+int32 fred[5]= { 3, 1, 4, 1, 5 };
+  ...
+  for (i=0; i < sizeof(fred); i++)
+    printf("fred[%d] is %d\n", i, fred[i]);
 ```
 
 ## Exceptions and Exception Handling

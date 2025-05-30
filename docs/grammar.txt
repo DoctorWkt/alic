@@ -19,22 +19,32 @@ struct_declaration= STRUCT LBRACE struct_list RBRACE
 
 struct_list= struct_item (COMMA struct_item)*
 
-struct_item= typed_declaration
+struct_item= array_typed_declaration
            | union_declaration
 
 union_declaration= UNION LBRACE typed_declaration_list RBRACE
 
-global_var_declaration= typed_declaration SEMI;
+visibility= ( PUBLIC | EXTERN )?
 
-function_declaration= function_prototype statement_block
-                    | function_prototype SEMI
+global_var_declaration= visibility array_typed_declaration decl_initialisation SEMI
+                      | visibility array_typed_declaration SEMI
 
-function_prototype= (typed_declaration LPAREN typed_declaration_list RPAREN
+decl_initialisation= ASSIGN expression
+                   | ASSIGN bracketed_expression_list
+
+function_declaration= visibility function_prototype statement_block
+                    | visibility function_prototype SEMI
+
+function_prototype= ( typed_declaration LPAREN typed_declaration_list RPAREN
                     | typed_declaration LPAREN VOID RPAREN
                     | typed_declaration LPAREN ELLIPSIS RPAREN
                     ) (THROWS typed_declaration )?
 
 typed_declaration_list= typed_declaration (COMMA typed_declaration_list)*
+
+array_typed_declaration= typed_declaration (array_size)?
+
+array_size= LBRACKET NUMLIT RBRACKET
 
 typed_declaration= type IDENT
 
@@ -50,8 +60,8 @@ user_defined_type= IDENT
 statement_block= LBRACE declaration_stmts procedural_stmts RBRACE
                | procedural_stmt
 
-declaration_stmts= ( typed_declaration ASSIGN expression SEMI
-                   | typed_declaration SEMI
+declaration_stmts= ( array_typed_declaration decl_initialisation
+                   | array_typed_declaration SEMI
                    )*
 
 procedural_stmts= ( assign_stmt
@@ -98,8 +108,8 @@ try_statement= TRY LPAREN IDENT RPAREN statement_block CATCH statement_block
 
 switch_stmt= SWITCH LPAREN expression RPAREN switch_stmt_block
 
-switch_stmt_block= (case_stmt
-                   |default_stmt
+switch_stmt_block= ( case_stmt
+                   | default_stmt
                    )+
 
 case_stmt= CASE expression COLON procedural_stmts?
@@ -111,12 +121,23 @@ fallthru_stmt= FALLTHRU SEMI
 function_call= IDENT LPAREN expression_list? RPAREN
              | IDENT LPAREN named_expression_list RPAREN
 
+bracketed_expression_list= LBRACE bracketed_expression_element
+                                  (COMMA bracketed_expression_element)*
+                           RBRACE
+
+bracketed_expression_element= expression
+                            | bracketed_expression_list
+
 expression_list= expression (COMMA expression_list)*
 
 named_expression_list= IDENT ASSIGN expression
                        (COMMA named_expression_list)*
 
-expression= bitwise_expression
+expression= ternary_expression
+
+ternary_expression= bitwise_expression
+                  | LPAREN relational_expression RPAREN
+                    QUESTION ternary_expression COLON ternary_expression
 
 bitwise_expression= ( INVERT boolean_expression
                     |        boolean_expression
@@ -179,10 +200,9 @@ primary_expression= NUMLIT
                   | LPAREN expression RPAREN
 
 sizeof_expression= SIZEOF LPAREN type RPAREN
+                 | SIZEOF LPAREN IDENT RPAREN
 
 postfix_variable= IDENT
                 | postfix_variable DOT IDENT
                 | postfix_variable LBRACKET expression RBRACKET
-
-variable= IDENT
 
