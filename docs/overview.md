@@ -173,6 +173,26 @@ type char = int8;
 type String = char *;
 ```
 
+## void *
+
+There is a built-in type which is `void *`. You can declare variables of this type and you can
+declare functions that return this type.
+
+You can assign a `void *` value to any pointer type, and you can assign any pointer type value to
+a `void *` variable. This is useful to do things like this:
+
+```
+void *malloc(size_t size);
+
+void main(void) {
+  int32 *fred;
+
+  fred= malloc(100 * sizeof(int32));
+}
+```
+
+without the need for casting.
+
 ## Structured Types
 
 *(see [Part 9](../Part_09/Readme.md))*
