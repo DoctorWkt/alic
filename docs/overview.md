@@ -46,9 +46,9 @@ Here is the list of operators in *alic* and their precedence.
 |  `+` `-`                      | Plus, minus                                                  |
 | `<<` `>>`                     | Left shift, right shift                                      |
 |`!` `==` `!=` `>` `>=` `<` `<=`| Logical not, comparison operators                            |
-|       `&#124;&#124;`          | Logical OR                                                   |
+|       &#124;&#124;            | Logical OR                                                   |
 |        `&&`                   | Logical AND                                                  |
-|   `~` `&` `|` `^`             | Bitwise NOT, AND, OR, XOR                                    |
+|   `~` `&` &#124; `^`          | Bitwise NOT, AND, OR, XOR                                    |
 |            `?:`               | Ternary operator                                             |
 
 
