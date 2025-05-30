@@ -69,21 +69,14 @@ Similarly, *alic* has post-increment and post-decrement **statements** (not expr
 
 *(see [Part 2](../Part_02/Readme.md))*
 
-*alic* has three control statements: `if`, `while` and `for`. They are much like the C equivalents. One difference is that all statement blocks much be surrounded by braces (i.e. curly brackets). In *alic*, you have to write:
-
-```
-  if (x > 5) {
-    printf("x is bigger than 5\n");
-  }
-```
-
-even if there is only one statement in the statement block, as shown above.
+*alic* has four control statements: `if`, `while`, `for` and `switch`. They are much like the C equivalents.
 
 With `while` and `for` loops, the condition has to be a relational expression (i.e. a comparison) or the constant `true`. You can't say `while(1)` but you can say `while(true)`.
 
 The three sections of the `for` loop are optional. If the middle condition is missing, it is treated as being `true`.
 
 You can use `break` and `continue` in loops, just as you can in C.
+You *can't* use `break` in a `switch` statement: see below for details.
 
 ## Functions and Function Calling
 
