@@ -10,9 +10,7 @@ For details of what *alic* looks like, see the [docs/](docs/) directory and the 
 *alic* stands for "a language inspired by C". It's going to look quite
 a lot like C. I also want to be able to use the existing C library,
 so *alic* has to be ABI compatible with C. But I want to try out some
-new language ideas and see if they work or not. I'm going to write the
-*alic* compiler in C; hopefully, later on I'll be able to then rewrite
-it in *alic* itself!
+new language ideas and see if they work or not.
 
 In this journey I'm going to have fewer, bigger chunks of development
 than I did with [acwj](https://github.com/DoctorWkt/acwj).
