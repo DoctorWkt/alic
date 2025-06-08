@@ -35,10 +35,10 @@ decl_initialisation= ASSIGN expression
 function_declaration= visibility function_prototype statement_block
                     | visibility function_prototype SEMI
 
-function_prototype= ( typed_declaration LPAREN typed_declaration_list RPAREN
-                    | typed_declaration LPAREN VOID RPAREN
-                    | typed_declaration LPAREN ELLIPSIS RPAREN
-                    ) (THROWS typed_declaration )?
+function_prototype= typed_declaration LPAREN
+                    ( typed_declaration_list (COMMA ELLIPSIS)?
+                    | VOID
+                    ) RPAREN (THROWS typed_declaration )?
 
 typed_declaration_list= typed_declaration (COMMA typed_declaration_list)*
 
@@ -75,6 +75,8 @@ procedural_stmts= ( assign_stmt
                   | try_stmt
                   | switch_stmt
                   | fallthru_stmt
+                  | va_start_stmt
+                  | va_end_stmt
                   | function_call SEMI
                   )*
 
@@ -120,6 +122,10 @@ fallthru_stmt= FALLTHRU SEMI
 
 function_call= IDENT LPAREN expression_list? RPAREN
              | IDENT LPAREN named_expression_list RPAREN
+
+va_start_stmt= VA_START LPAREN IDENT RPAREN SEMI
+
+va_end_stmt= VA_END LPAREN IDENT RPAREN SEMI
 
 bracketed_expression_list= LBRACE bracketed_expression_element
                                   (COMMA bracketed_expression_element)*
@@ -195,12 +201,18 @@ primary_expression= NUMLIT
                   | NULL
                   | ENUMVAL
                   | sizeof_expression
+                  | va_arg_expression
+                  | unsigned_expression
                   | postfix_variable
                   | function_call
                   | LPAREN expression RPAREN
 
 sizeof_expression= SIZEOF LPAREN type RPAREN
                  | SIZEOF LPAREN IDENT RPAREN
+
+va_arg_expression= VA_ARG LPAREN IDENT COMMA type RPAREN
+
+unsigned_expression= UNSIGNED LPAREN expression RPAREN
 
 postfix_variable= IDENT
                 | postfix_variable DOT IDENT

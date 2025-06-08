@@ -22,15 +22,17 @@ In terms of implicit widening:
  * both signed and unsigned integers can be widened to either floating point type, and
  * `bool` can be widened to any integer or floating point type: `false` is 0 and `true` is 1.
 
-However, note that `bool` is not an integer type: you can only assign `true` or `false` to a `bool` variable.
+You cannot mix signed and unsigned integers, unless you use `unsigned()` (see below).
+
+Note that `bool` is not an integer type: you can only assign `true` or `false` to a `bool` variable.
 
 There is no `void` type; this keyword is only used to show a function that returns no value and/or takes no arguments.
 
-There is a `void *` type. This is a type that can be assigned a pointer of any type, and be assigned to a pointer of any type.
+There is a `void *` type. This is a type that can be assigned a pointer of any type, and be assigned to a pointer of any type; see below.
 
 `NULL` is built into the *alic* language and is a `void *` pointer with the value 0.
 
-At present, *alic* does not have the ability to do type casting.
+*alic* does not support type casting, in order to reduce undefined behaviour.
 
 ## Operators and Precedence
 
@@ -65,6 +67,7 @@ Similarly, *alic* has post-increment and post-decrement **statements** (not expr
    jim--;
 ```
 
+
 ## Control Statements
 
 *(see [Part 2](../Part_02/Readme.md))*
@@ -72,6 +75,8 @@ Similarly, *alic* has post-increment and post-decrement **statements** (not expr
 *alic* has four control statements: `if`, `while`, `for` and `switch`. They are much like the C equivalents.
 
 With `while` and `for` loops, the condition has to be a relational expression (i.e. a comparison) or the constant `true`. You can't say `while(1)` but you can say `while(true)`.
+
+The first and last section of the `for` loop are single statements: you can't say `for (i=0, x=3; i < 10; i++)` for example.
 
 The three sections of the `for` loop are optional. If the middle condition is missing, it is treated as being `true`.
 
@@ -110,13 +115,42 @@ If you choose to name arguments, you must name all of them.
 
 ## Variadic Functions
 
-A [variadic](https://en.wikipedia.org/wiki/Variadic_function) function is indicated by an ellipsis ( `...` ) as the function's parameter list, e.g.
+A [variadic](https://en.wikipedia.org/wiki/Variadic_function) function is indicated by an ellipsis ( `...` ) at the end of the function's parameter list, e.g.
 
 ```
-  int foobar(...) { ... }
+int16 foobar(int8 *fmt, ...) { <code> }
 ```
 
-This differs from C where you can name several parameters and put the ellipsis after them.
+In order to access variadic arguments from inside a variadic function, you first declare a `void *` variable, and then use the pseudo-function `va_start()` to point it at a hidden structure which holds the state of the variadic argument. And when you are finished with the variadic arguments, you use `va_end()` to indicate this. For example:
+
+```
+int16 foobar(int8 *fmt, ...) {
+  void *ptr;
+
+  va_start(ptr);
+  <code>
+  va_end(ptr);
+}
+```
+
+Once you have done `va_start()`, you can use `va_arg()` to access the next variadic argument. This pseudo-function takes two arguments: the state pointer and the type of the variadic argument. So, to continue the above example:
+
+```
+int16 foobar(int8 *fmt, ...) {
+  void *ptr;
+  int32 x;
+  flt64 y;
+  uint32 z;
+
+  va_start(ptr);           # Initialise the state pointer
+  x= va_arg(ptr,int32);    # Get an int32 argument value
+  y= va_arg(ptr,flt64);    # Ditto for a flt64 value
+  z= va_arg(ptr,uint32);   # Ditto for an uin32 value
+  va_end(ptr);
+}
+```
+
+Depending on your platform's ABI, variadic arguments will be widened to meet minimum sizes. On the 64-bit Intel/AMD platform, integers are widened to be at least 32 bits and floats are widened to be 64 bits. You cannot use integer/floating types smaller than these with `va_arg()`.
 
 ## Header Files
 
@@ -128,7 +162,9 @@ The *alic* compiler invokes the C-preprocessor on the input files, so you can in
 
 By default, functions and non-local variables are marked as *not* visible to other files: they are, thus, private to the file being compiled.
 
-The aim here is to make it easier for a programmer to prevent "leakage" of symbol names. If you want a function or variable to be visible, you now have to mark it as `public`.
+The aim here is to make it easier for a programmer to prevent "leakage" of symbol names. If you want a function or variable to be visible, you now have to mark it as `public`. You must also add `public` to function prototypes if they represent functions which must be visible across many source files.
+
+This also means that you **must** declare `main()` to be `public`!
 
 ## Enums
 
@@ -308,7 +344,7 @@ To reduce any undefined behaviour, any variable declaration (local or non-local)
 
 ### sizeof()
 
-`sizeof()` is fairly similar to the C version. You can get the size of a type and the size of a variable. However, if the variable is an array, then you get the number of elements in the array. For example:
+The pseudo-function `sizeof()` is fairly similar to the C version. You can get the size of a type and the size of a variable. However, if the variable is an array, then you get the number of elements in the array. For example:
 
 ```
 int32 fred[5]= { 3, 1, 4, 1, 5 };
@@ -378,31 +414,78 @@ You can call functions that throw exceptions in the `catch` block as well. Howev
 
 These look the same as C switch statements, but there is a **big** difference: cases do not fall through to the next case; instead, they jump to the end of the switch statement. If you want to fall through to the next case, you need to use the `fallthru` keyword. Also, the `break` statement is **not** used in a switch statement; it is only used for loops.
 
-Here is an example *alic* program that demonstrates the switch statement:
-
+Here is an example *alic* program that demonstrates the switch statement and its output:
 
 ```
-void main(void) {
+#include <stdio.ah>
+
+public void main(void) {
   int32 x;
 
-  for (x=1; x <= 9; x++) {
+  for (x=1; x <= 9; x= x + 1) {
     switch(x) {
-      case  3: printf("case 3\n");                        // Only prints 3
-      case  4:
+      case  3: printf("case 3\n");
       case  5:
-      case  6: printf("case %d\n",x);                     // 4 and 5 fall through to 7
-               if (x < 6) {
-                 printf("fallthru to ...\n");
-                 fallthru;                                // because of this line
-               }
-               printf("case 6 does not fall through!\n");
-      case  7: printf("case 7\n");                        // Only prints 7
+      case  6: printf("case %d, fallthru to ...\n",x);
+	       fallthru;
+      case  7: printf("case 7\n");
       default: printf("case %d, default\n", x);
     }
   }
 }
+
+case 1, default
+case 2, default
+case 3
+case 4, default
+case 5, fallthru to ...
+case 7
+case 6, fallthru to ...
+case 7
+case 7
+case 8, default
+case 9, default
+```
+
+## The `unsigned()` Pseudo-function
+
+*alic* does not provide a way to cast types, in order to reduce undefined behaviour. There is a built-in pseudo-function called `unsigned()`. It takes an expression of signed integer type and emits a value of unsigned integer type if the expression evaluates positive. For example:
+
+```
+  int16 x= 5;
+  uint32 y;
+
+  y= unsigned( 2 * x + 2);
+```
+
+However, if the expression's value at run-time is below zero, the program will print an error message and `exit(1)`. Here is another example program and its output:
+
+```
+#include <stdio.ah>
+
+public void main(void) {
+  int32 x;
+  uint32 y;
+
+  for (x= 2; x > -3; x--) {
+    printf("x is %d\n", x);
+    y = unsigned(x);
+    printf("y is %d\n", y);
+  }
+}
+
+x is 2
+y is 2
+x is 1
+y is 1
+x is 0
+y is 0
+x is -1
+can't make -1 unsigned in main()
 ```
 
 ## Example *alic* Programs
 
 In the *tests* directory in each part there are dozens of example programs which I use to do regression testing on the compiler. Most are trivial but there are some bigger programs.
+
+In the *cina* directory you will find a compiler for *alic* written in the *alic* language. It's about 6,500 lines of real-world code.

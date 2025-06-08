@@ -1,0 +1,9 @@
+#ifndef SYS_TYPES_AH
+# define SYS_TYPES_AH
+
+// Some simpler type names for the x64 platform
+type char = int8;
+type int  = int32;
+type uint = uint32;
+
+#endif
