@@ -488,4 +488,4 @@ can't make -1 unsigned in main()
 
 In the *tests* directory in each part there are dozens of example programs which I use to do regression testing on the compiler. Most are trivial but there are some bigger programs.
 
-In the *cina* directory you will find a compiler for *alic* written in the *alic* language. It's about 6,500 lines of real-world code.
+In the *cina* directory in Part 13 you will find a compiler for *alic* written in the *alic* language. It's about 6,500 lines of real-world code.
