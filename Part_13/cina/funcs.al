@@ -40,7 +40,7 @@ public bool add_function(ASTnode * func, ASTnode * paramlist, int visibility) {
     // Walk both the paramlist and the member list 
     // in this to verify both lists are the same
     this = funcptr.paramlist;
-    while (1) {
+    while (true) {
       // No remaining parameters
       if (this == NULL && paramlist == NULL)
 	break;

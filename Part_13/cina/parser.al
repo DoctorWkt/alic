@@ -187,7 +187,7 @@ void enum_declaration(void) {
   // Loop getting the next enum item
   val.intval = 0;
   val.numtype = NUM_INT;
-  while (1) {
+  while (true) {
     // Make sure that we have an identifier
     match(T_IDENT, true);
     name = Thistoken.tokstr;
@@ -387,7 +387,7 @@ void struct_declaration(char *name) {
     fprintf(Debugfh, "type struct %s:\n", name);
 
   // Loop getting members for the struct
-  while (1) {
+  while (true) {
     // Is the next token a UNION?
     if (Thistoken.token == T_UNION) {
       // Get the union declaration
@@ -726,7 +726,7 @@ ASTnode *typed_declaration_list(void) {
   this = typed_declaration();
   first = this;
 
-  while (1) {
+  while (true) {
     // If no comma, stop now
     if (Thistoken.token != T_COMMA)
       break;
@@ -991,7 +991,7 @@ ASTnode *procedural_stmts(void) {
   ASTnode *left = NULL;
   ASTnode *right;
 
-  while (1) {
+  while (true) {
     // Try to get another statement
     right = procedural_stmt();
     if (right == NULL)
@@ -1609,7 +1609,7 @@ ASTnode *bracketed_expression_list(void) {
   bel.left = this;
 
   // Loop trying to get more of them
-  while (1) {
+  while (true) {
     // No more, so stop
     if (Thistoken.token != T_COMMA)
       break;
@@ -1692,7 +1692,7 @@ ASTnode *named_expression_list(void) {
   expr = expression();
   first.left = expr;
 
-  while (1) {
+  while (true) {
     // If no comma, stop now
     if (Thistoken.token != T_COMMA)
       break;
@@ -1840,7 +1840,7 @@ ASTnode *logical_and_expression(void) {
   left = logical_or_expression();
 
   // See if we have more logical AND operations
-  while (1) {
+  while (true) {
     if (Thistoken.token != T_LOGAND)
       break;
     scan(&Thistoken);
@@ -1865,7 +1865,7 @@ ASTnode *logical_or_expression(void) {
   left = relational_expression();
 
   // See if we have more logical OR operations
-  while (1) {
+  while (true) {
     if (Thistoken.token != T_LOGOR)
       break;
     scan(&Thistoken);
