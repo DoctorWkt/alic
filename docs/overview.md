@@ -554,6 +554,8 @@ case 9, default
 
 ## The `cast()` Pseudo-function
 
+*(see [Part 14](../Part_14/Readme.md))*
+
 *alic* provides a way to cast types in a way that reduces undefined behaviour. There is a built-in pseudo-function called `cast()`. It takes an expression of numeric type and a destination numeric type. The expression's value is checked at run-time to ensure that it fits into the range of the destination type. Here is an example:
 
 ```

@@ -135,7 +135,7 @@ primary_expression= NUMLIT
                   ...
 ```
 
-That's it! For variables, and struct members, the typed declaration can now be preceded by an optional `const`. We can assign `const` to a variable, which just adds the `const` attribute to it. And string literals can be preceded by an optional `const`. Now let's look at the changes to the compiler.
+That's it! For variables and struct members, the typed declaration can now be preceded by an optional `const`. We can assign `const` to a variable, which just adds the `const` attribute to it. And string literals can be preceded by an optional `const`. Now let's look at the changes to the compiler.
 
 There's a new keyword `const` and associated token type `T_CONST` which affects [alic.h](alic.h) and [lexer.c](lexer.c). The changes to the parsing in [parser.c](parser.c) are negligible and I won't go through them.
 
@@ -169,7 +169,7 @@ Most of this code is in [parser.c](parser.c), but there is some in the other C s
   <struct>->is_const= <other struct>->is_const;
 ```
 
-One interesting one is in `postfix_variable()` in [parser.c](parser.c) when we have to protect a single struct instead of the whole struct: in this case we *don't* "bubble up" the underlying symbol's `const` attribute:
+One interesting one is in `postfix_variable()` in [parser.c](parser.c) when we have to protect a single struct member instead of the whole struct: in this case we *don't* "bubble up" the underlying symbol's `const` attribute:
 
 ```
       // If the member is marked const, set this node's const
@@ -385,7 +385,7 @@ Test 162 does all 100 type conversions using `cast()` as a check that it all doe
 
 ## Setting the Programmer's Mindset
 
-I thought it might be time for me to talk a little bit about the mindset of programming in a language. Each language has its own idioms. One of the things I'm trying to do with *alic* is break away from the C mindset and encourage a `safer` mindset.
+I thought it might be time for me to talk a little bit about the mindset of programming in a language. Each language has its own idioms. One of the things I'm trying to do with *alic* is break away from the C mindset and encourage a *safer* mindset.
 
 For example:
 
