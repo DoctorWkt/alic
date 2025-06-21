@@ -38,7 +38,7 @@ Note that I want to keep `bool` separate from the integer types; thus, 0 does no
 
 ## Statements
 
-For this first part of the *alic* journey, there are only three statements. Here are the relevant grammar rules from the [parser.leg](parser.leg) file with the implementation code removed:
+For this first part of the *alic* journey, there are only three statements. Here are the relevant grammar rules from the [parse.leg](parse.leg) file with the implementation code removed:
 
 ```
 statements = statement+ EOF
@@ -65,7 +65,7 @@ A `print_stmt` is the token PRINT followed by an expression and a semi-colon, e.
 
 ## *leg* and Tokens
 
-*leg* acts as both a parser generator and also a token generator. Here are some more rules from the [parser.leg](parser.leg) file:
+*leg* acts as both a parser generator and also a token generator. Here are some more rules from the [parse.leg](parse.leg) file:
 
 ```
 EOF = !.
