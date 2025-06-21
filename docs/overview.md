@@ -22,7 +22,7 @@ In terms of implicit widening:
  * both signed and unsigned integers can be widened to either floating point type, and
  * `bool` can be widened to any integer or floating point type: `false` is 0 and `true` is 1.
 
-You cannot mix signed and unsigned integers, unless you use `unsigned()` (see below).
+There is a pseudo-function `cast()` to cast numeric types where the destination range or precision is smaller than the original type; see below.
 
 Note that `bool` is not an integer type: you can only assign `true` or `false` to a `bool` variable.
 
@@ -32,7 +32,6 @@ There is a `void *` type. This is a type that can be assigned a pointer of any t
 
 `NULL` is built into the *alic* language and is a `void *` pointer with the value 0.
 
-*alic* does not support type casting, in order to reduce undefined behaviour.
 
 ## Operators and Precedence
 
@@ -74,7 +73,7 @@ Similarly, *alic* has post-increment and post-decrement **statements** (not expr
 
 *alic* has four control statements: `if`, `while`, `for` and `switch`. They are much like the C equivalents.
 
-With `while` and `for` loops, the condition has to be a relational expression (i.e. a comparison) or the constant `true`. You can't say `while(1)` but you can say `while(true)`.
+With `while` and `for` loops, the condition has to be a boolean expression (e.g. a comparison) or the constant `true`. You can't say `while(1)` but you can say `while(true)`.
 
 The first and last section of the `for` loop are single statements: you can't say `for (i=0, x=3; i < 10; i++)` for example.
 
@@ -121,7 +120,7 @@ A [variadic](https://en.wikipedia.org/wiki/Variadic_function) function is indica
 int16 foobar(int8 *fmt, ...) { <code> }
 ```
 
-In order to access variadic arguments from inside a variadic function, you first declare a `void *` variable, and then use the pseudo-function `va_start()` to point it at a hidden structure which holds the state of the variadic argument. And when you are finished with the variadic arguments, you use `va_end()` to indicate this. For example:
+In order to access variadic arguments from inside a variadic function, you first declare a `void *` variable, and then use the pseudo-function `va_start()` to point it at a hidden structure which holds the state of the variadic arguments. And when you are finished with the variadic arguments, you use `va_end()` to indicate this. For example:
 
 ```
 int16 foobar(int8 *fmt, ...) {
@@ -342,6 +341,112 @@ void main(void) {
 
 To reduce any undefined behaviour, any variable declaration (local or non-local) without an initialisation expression will be filled with zero bits.
 
+## The `const` Keyword
+
+*(see [Part 14](../Part_14/Readme.md))*
+
+The `const` keyword can be applied to:
+
+  * global variable declarations after any `extern` or `public`,
+  * parameter and local variable declarations,
+  * before any string literals, and
+  * struct members in the type definition, and
+  * assignment statements.
+
+The `const` keyword has the following meanings.
+
+For scalar variables, once the variable is declared with any initialisation its value cannot be changed. Example:
+
+```
+  const int32 x = y + 7;
+  x= 5;                     // Not permitted
+```
+
+For pointer variables, after the initialisation the pointer cannot be pointed at anything else. However, the value that it points to can be changed. Example:
+
+```
+  char *name= "Fred Bloggs";
+  const char *ptr = name;        // ptr points at name
+  char *addr= "23 Blah st";
+
+  ptr= addr;                     // Not permitted
+  *ptr= "G";                     // Permitted: 'F' is changed to 'G'
+```
+
+For array variables, after the initialisation no value in the array can be changed. Example:
+
+```
+const int32 x[5]= { 2, 4, 6, 8, 10 };
+
+public void main(void) {
+  x[3]= 100;                     // Not permitted
+}
+```
+
+For struct variables, after the initialisation no member value in the struct can be changed. Example:
+
+```
+type FOO = struct {
+  int32 x,
+  int8 y,
+  flt32 z
+};
+
+const FOO fred = { 100, -3, 3.14 };
+
+public void main(void) {
+  fred.y = 45;                      // Not permitted
+}
+```
+
+For struct members, after the initialisation the member's value in the struct cannot be changed. Example:
+
+```
+type FOO = struct {
+  int32 x,
+  const int8 y,
+  flt32 z
+};
+
+FOO fred = { 100, -3, 3.14 };
+
+public void main(void) {
+  fred.x = 300;                     // Permitted
+  fred.y = 45;                      // Not permitted
+}
+```
+
+The `const` keyword can also precede string literals. In this situation, no characters in the string literal can be changed. Example:
+
+```
+public void main(void) {
+  char *name= const "Fred Bloggs";
+
+  *name = 'G';                      // Not permitted
+  name[2] = 'x';                    // Not permitted
+  name = NULL;                      // Permitted as name isn't const
+}
+```
+
+In an assignment statement the word `const` following the `=` sign tells the compiler to mark the variable as being `const`. Any future assignments to the variable, as seen at compile time only, will be treated as an error. Example:
+
+```
+public void main(void) {
+  int32 result;
+
+  result = 7;       // Result set to 7
+  result = const;   // Now it cannot be changed
+  result= 100;      // Not permitted
+```
+
+You can do this to single variable names: scalars, array names, struct names.
+You can't do this, using the `.` operator, to make individual array elements
+or struct members `const`.
+
+A `const` violation via an assignment is detected at compile time and will produce an error message like this: `input.al line 6: Cannot change a const variable`.
+
+Global `const` variables and `const` string literals will be stored in the read-only data section in the final executable. Thus, if you try to circumvent their `const` attribute (e.g. by taking a pointer to them and then assigning to a value at that pointer), your program will stop with a segmentation fault.
+
 ### sizeof()
 
 The pseudo-function `sizeof()` is fairly similar to the C version. You can get the size of a type and the size of a variable. However, if the variable is an array, then you get the number of elements in the array. For example:
@@ -447,45 +552,32 @@ case 8, default
 case 9, default
 ```
 
-## The `unsigned()` Pseudo-function
+## The `cast()` Pseudo-function
 
-*alic* does not provide a way to cast types, in order to reduce undefined behaviour. There is a built-in pseudo-function called `unsigned()`. It takes an expression of signed integer type and emits a value of unsigned integer type if the expression evaluates positive. For example:
-
-```
-  int16 x= 5;
-  uint32 y;
-
-  y= unsigned( 2 * x + 2);
-```
-
-However, if the expression's value at run-time is below zero, the program will print an error message and `exit(1)`. Here is another example program and its output:
+*alic* provides a way to cast types in a way that reduces undefined behaviour. There is a built-in pseudo-function called `cast()`. It takes an expression of numeric type and a destination numeric type. The expression's value is checked at run-time to ensure that it fits into the range of the destination type. Here is an example:
 
 ```
-#include <stdio.ah>
+  int8 num;
 
-public void main(void) {
-  int32 x;
-  uint32 y;
-
-  for (x= 2; x > -3; x--) {
-    printf("x is %d\n", x);
-    y = unsigned(x);
-    printf("y is %d\n", y);
-  }
-}
-
-x is 2
-y is 2
-x is 1
-y is 1
-x is 0
-y is 0
-x is -1
-can't make -1 unsigned in main()
+  num= cast( rand() & 0xF, int8);      // Get a random number between 0 and 15
 ```
+
+If the expression's value at run-time is outside the range of the destination type, an error message will be printed and the program will crash. Here is an example:
+
+```
+  int8 num;
+
+  num= cast( rand() & 0xFF, int8);
+```
+
+The expression `rand() & 0xFF` can create random numbers in the range 0 .. 255, but `int8` has the range -1 .. 127. Any value over 127 will cause a run-time error.
+
+`cast()` can convert (with run-time checking) all ten numeric types to all ten numeric types.
 
 ## Example *alic* Programs
 
 In the *tests* directory in each part there are dozens of example programs which I use to do regression testing on the compiler. Most are trivial but there are some bigger programs.
 
-In the *cina* directory in Part 13 you will find a compiler for *alic* written in the *alic* language. It's about 6,500 lines of real-world code.
+In the *examples* directory  in each part you will find some non-trivial example programs.
+
+In the *cina* directory in Parts 13 and up you will find a compiler for *alic* written in the *alic* language. It's about 6,500 lines of real-world code.

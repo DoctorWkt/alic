@@ -1,0 +1,1 @@
+We opened fred!

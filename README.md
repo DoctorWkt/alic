@@ -29,12 +29,14 @@ Here are the parts of the *alic* journey so far:
   * [Part 11](Part_11/Readme.md): More C Features
   * [Part 12](Part_12/Readme.md): Arrays, Finally
   * [Part 13](Part_13/Readme.md): Rewriting the *alic* Compiler in *alic*
+  * [Part 14](Part_14/Readme.md): Adding `const` and `cast()` to *alic*
 
 If you just want to see the language features in *alic* which make it
 different than C, then you can check out these parts:
 [Part 6](Part_06/Readme.md), [Part 8](Part_08/Readme.md),
 [Part 9](Part_09/Readme.md), [Part 10](Part_10/Readme.md),
-[Part 11 (Switch Statements)](Part_11/Readme.md), [Part 12](Part_12/Readme.md).
+[Part 11 (Switch Statements)](Part_11/Readme.md),
+[Part 12](Part_12/Readme.md), [Part 14](Part_14/Readme.md).
 
 ## Building the Compiler
 
@@ -46,7 +48,7 @@ Then you should be able to do a `$ make` in each part to build the executable ca
 
 There are a bunch of example test programs in the `tests/` directory in each part. At the top level of each part, do a `$ make test` to go into this directory and run the `runtests` script. This checks the output of each file to ensure it runs correctly, or checks that the compiler dies with the correct fatal error.
 
-In the [cina/](cina/) directory in Part 13 you will find the *alic* compiler written in the *alic* language itself. To build this, at the top level of Part 13 do a `$ make triple`. This will:
+In the [cina/](cina/) directory in Parts 13 and up you will find the *alic* compiler written in the *alic* language itself. To build this, at the top level of Part 13 (for example) do a `$ make triple`. This will:
 
   * Build the compiler using the C source code, producing the *alic* executable
   * Build the compiler using the *alic* source code, producing the *cina/alica* executable

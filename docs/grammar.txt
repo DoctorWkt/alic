@@ -26,8 +26,8 @@ union_declaration= UNION LBRACE typed_declaration_list RBRACE
 
 visibility= ( PUBLIC | EXTERN )?
 
-global_var_declaration= visibility array_typed_declaration decl_initialisation SEMI
-                      | visibility array_typed_declaration SEMI
+global_var_declaration= visibility array_typed_declaration
+                        decl_initialisation? SEMI
 
 decl_initialisation= ASSIGN expression
                    | ASSIGN bracketed_expression_list
@@ -46,7 +46,7 @@ array_typed_declaration= typed_declaration (array_size)?
 
 array_size= LBRACKET NUMLIT RBRACKET
 
-typed_declaration= type IDENT
+typed_declaration= CONST? type IDENT
 
 type= (builtin_type | user_defined_type) STAR*
 
@@ -83,18 +83,19 @@ procedural_stmts= ( assign_stmt
 assign_stmt= short_assign_stmt SEMI
 
 short_assign_stmt= postfix_variable ASSIGN expression
+                 | postfix_variable ASSIGN CONST
                  | postfix_variable POSTINC
                  | postfix_variable POSTDEC
 
 
-if_stmt= IF LPAREN boolean_expression RPAREN statement_block
+if_stmt= IF LPAREN expression RPAREN statement_block
          (ELSE statement_block)?
 
-while_stmt= WHILE LPAREN boolean_expression RPAREN statement_block
+while_stmt= WHILE LPAREN expression RPAREN statement_block
           | WHILE LPAREN TRUE RPAREN statement_block
 
 for_stmt= FOR LPAREN short_assign_stmt? SEMI
-                     boolean_expression? SEMI
+                     expression? SEMI
                      short_assign_stmt? RPAREN statement_block
 
 return_stmt= RETURN LPAREN expression RPAREN SEMI
@@ -195,14 +196,14 @@ unary_expression= primary_expression
                 | AMPER primary_expression
 
 primary_expression= NUMLIT
-                  | STRLIT
+                  | CONST? STRLIT
                   | TRUE
                   | FALSE
                   | NULL
                   | ENUMVAL
                   | sizeof_expression
                   | va_arg_expression
-                  | unsigned_expression
+                  | cast_expression
                   | postfix_variable
                   | function_call
                   | LPAREN expression RPAREN
@@ -212,7 +213,7 @@ sizeof_expression= SIZEOF LPAREN type RPAREN
 
 va_arg_expression= VA_ARG LPAREN IDENT COMMA type RPAREN
 
-unsigned_expression= UNSIGNED LPAREN expression RPAREN
+cast_expression= CAST LPAREN expression COMMA type PAREN
 
 postfix_variable= IDENT
                 | postfix_variable DOT IDENT

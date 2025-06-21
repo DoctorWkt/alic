@@ -1,0 +1,16 @@
+#ifndef _UNISTD_AH
+# define _UNISTD_AH
+
+#include <sys/types.ah>
+
+void _exit(int status);
+int unlink(char *pathname);
+
+int getopt(int argc, char **argv, char *optstring);
+
+extern char *optarg;
+extern int optind;
+extern int opterr;
+extern int optopt;
+
+#endif	// _UNISTD_AH
