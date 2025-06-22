@@ -193,8 +193,8 @@ public void main(void) {
       continue;
     }
 
+    // Make the user's move
     Board[move]= 'X'; movecount++;
-    if (movecount==9) break;
 
     // See if that's a winning move
     if (is_win('X')) {
@@ -202,6 +202,9 @@ public void main(void) {
       printf("You win! Congratulations.\n");
       exit(0);
     }
+
+    // Stop if all nine moves have been made
+    if (movecount==9) break;
 
     // Now it's our turn. See if we have a winning move
     move= winning_move('O');
