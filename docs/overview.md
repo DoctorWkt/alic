@@ -75,7 +75,7 @@ Similarly, *alic* has post-increment and post-decrement **statements** (not expr
 
 With `while` and `for` loops, the condition has to be a boolean expression (e.g. a comparison) or the constant `true`. You can't say `while(1)` but you can say `while(true)`.
 
-The first and last section of the `for` loop are either single statements or a statement block. The latter is a list of statements surrounded by braces. Thus, these loops are equivalent:
+The first and last sections of the `for` loop are either single statements or a statement block. The latter is a list of statements surrounded by braces. Thus, these loops are equivalent:
 
 ```
   for (i=0, x=3; i < 10; i++)      // C version
