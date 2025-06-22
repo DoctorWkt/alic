@@ -191,10 +191,10 @@ int16 foobar(int8 *fmt, ...) {
   flt64 y;
   uint32 z;
 
-  va_start(ptr);           # Initialise the state pointer
-  x= va_arg(ptr,int32);    # Get an int32 argument value
-  y= va_arg(ptr,flt64);    # Ditto for a flt64 value
-  z= va_arg(ptr,uint32);   # Ditto for an uin32 value
+  va_start(ptr);           // Initialise the state pointer
+  x= va_arg(ptr,int32);    // Get an int32 argument value
+  y= va_arg(ptr,flt64);    // Ditto for a flt64 value
+  z= va_arg(ptr,uint32);   // Ditto for an uin32 value
   va_end(ptr);
 }
 ```
@@ -223,7 +223,7 @@ An `enum` in *alic* is **not** a type; it's just a way to give names to integer 
 enum { a, b, c=25, d, e= -34, f, g };
 ```
 
-`a` is the constant 0, `b` is 1, `c` and `d` as shown, `f` is -33 and `g` is -32.
+`a` is the constant 0, `b` is 1, `c` and `e` as shown, `d` is 26, `f` is -33 and `g` is -32.
 
 ## User-defined Types
 
@@ -335,7 +335,7 @@ You can use a pointer as the base of an array:
 
 ## Arrays
 
-In *alic*, when you declare an array, you *must* give the number of elements, e.g.
+In *alic*, arrays are fixed in size. When you declare an array, you *must* give the number of elements, e.g.
 
 ```
 int32 fred[5];
@@ -355,7 +355,7 @@ type FOO = int32 fred[5];
 
 ## Array Bounds Checking
 
-By default, an access into an array will be bounds checked. If the index is below zero, or greater than or equal to the number of elements, the program will print an error message and `exit(1)`. You can disable this by using the `-B` compiler command-line option.
+By default, an access into an array will be bounds checked. If the index is below zero or greater than or equal to the number of elements, the program will print an error message and `exit(1)`. You can disable this by using the `-B` compiler command-line option.
 
 If you use array access via a pointer, there is no bounds checking.
 
@@ -490,7 +490,7 @@ public void main(void) {
 ```
 
 You can do this to single variable names: scalars, array names, struct names.
-You can't do this, using the `.` operator, to make individual array elements
+You can't do this, using the `.` or `[]` operators, to make individual array elements
 or struct members `const`.
 
 A `const` violation via an assignment is detected at compile time and will produce an error message like this: `input.al line 6: Cannot change a const variable`.
@@ -632,4 +632,4 @@ In the *tests* directory in each part there are dozens of example programs which
 
 In the *examples* directory  in each part you will find some non-trivial example programs.
 
-In the *cina* directory in Parts 13 and up you will find a compiler for *alic* written in the *alic* language. It's about 6,500 lines of real-world code.
+In the *cina* directory in Parts 13 and up you will find a compiler for *alic* written in the *alic* language. It's about 7,000 lines of real-world code.
