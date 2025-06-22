@@ -2,7 +2,9 @@
 
 This document refers to the latest version of *alic* in the *alic* journey.
 
-*alic* is a toy language, partly inspired by C. If I don't mention a feature here, and if you can't see it in *alic*'s [grammar definition](grammar.txt), then *alic* doesn't have the feature.
+*alic* is a toy language, partly inspired by C. My aim is to reduce the amount of undefined behaviour in *alic* (compared to C) and to add features that I wish C had.
+
+If I don't mention a feature here, and if you can't see it in *alic*'s [grammar definition](grammar.txt), then *alic* doesn't have the feature.
 
 ## Built-in Types
 
