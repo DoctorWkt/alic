@@ -50,7 +50,7 @@ Then you should be able to do a `$ make` in each part to build the executable ca
 
 There are a bunch of example test programs in the `tests/` directory in each part. At the top level of each part, do a `$ make test` to go into this directory and run the `runtests` script. This checks the output of each file to ensure it runs correctly, or checks that the compiler dies with the correct fatal error.
 
-In the [cina/](cina/) directory in Parts 13 and up you will find the *alic* compiler written in the *alic* language itself. To build this, at the top level of Part 13 (for example) do a `$ make triple`. This will:
+In the `cina/` directory in Parts 13 and up you will find the *alic* compiler written in the *alic* language itself. To build this, at the top level of Part 13 (for example) do a `$ make triple`. This will:
 
   * Build the compiler using the C source code, producing the *alic* executable
   * Build the compiler using the *alic* source code, producing the *cina/alica* executable
