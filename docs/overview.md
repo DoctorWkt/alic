@@ -75,12 +75,62 @@ Similarly, *alic* has post-increment and post-decrement **statements** (not expr
 
 With `while` and `for` loops, the condition has to be a boolean expression (e.g. a comparison) or the constant `true`. You can't say `while(1)` but you can say `while(true)`.
 
-The first and last section of the `for` loop are single statements: you can't say `for (i=0, x=3; i < 10; i++)` for example.
+The first and last section of the `for` loop are either single statements or a statement block. The latter is a list of statements surrounded by braces. Thus, these loops are equivalent:
+
+```
+  for (i=0, x=3; i < 10; i++)      // C version
+  for ({i=0; x=3;} ; i < 10; i++)  // alic version
+```
 
 The three sections of the `for` loop are optional. If the middle condition is missing, it is treated as being `true`.
 
 You can use `break` and `continue` in loops, just as you can in C.
 You *can't* use `break` in a `switch` statement: see below for details.
+
+## Foreach Loops
+
+*(see [Part 15](../Part_15/Readme.md))*
+
+There are three flavours of `foreach` loops which are essentially syntactic sugar versions of `for` loops.
+
+The first is to iterate over array elements:
+
+```
+  int32 list[5]= { 1, 2, 3, 4, 7 };
+  int32 elem;
+
+  // Print out all the elements in the list
+  foreach elem (list)
+    printf("%d\n", elem);
+```
+
+The second is to iterate across an *inclusive* range of values:
+
+```
+  int32 i;
+
+  // Print out the numbers from 1 to 100
+  foreach i (1 ... 100)
+    printf("%d\n", i);
+```
+
+And the third is to walk a linked list:
+
+```
+type FOO = struct {
+  int32 value,
+  FOO *next
+};
+
+FOO *Head;
+...
+  FOO *this;
+
+  // Walk the list from Head down
+  // and print out all the values
+  foreach this (Head, this.next)
+    printf("%d\n", this.value);
+```
 
 ## Functions and Function Calling
 

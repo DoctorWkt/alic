@@ -30,13 +30,15 @@ Here are the parts of the *alic* journey so far:
   * [Part 12](Part_12/Readme.md): Arrays, Finally
   * [Part 13](Part_13/Readme.md): Rewriting the *alic* Compiler in *alic*
   * [Part 14](Part_14/Readme.md): Adding `const` and `cast()` to *alic*
+  * [Part 15](Part_15/Readme.md): Some More Loop Constructs
 
 If you just want to see the language features in *alic* which make it
 different than C, then you can check out these parts:
 [Part 6](Part_06/Readme.md), [Part 8](Part_08/Readme.md),
 [Part 9](Part_09/Readme.md), [Part 10](Part_10/Readme.md),
 [Part 11 (Switch Statements)](Part_11/Readme.md),
-[Part 12](Part_12/Readme.md), [Part 14](Part_14/Readme.md).
+[Part 12](Part_12/Readme.md), [Part 14](Part_14/Readme.md),
+[Part 15](Part_15/Readme.md).
 
 ## Building the Compiler
 

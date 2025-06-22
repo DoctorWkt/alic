@@ -1,0 +1,133 @@
+// astnodes.c
+public ASTnode *mkastnode(const int op, const ASTnode * left,
+		const ASTnode * mid, const ASTnode * right);
+public ASTnode *mkastleaf(const int op, const Type * ty, const bool rvalue,
+		const Sym * sym, const int64 intval);
+public void dumpAST(const ASTnode * n, int level);
+public ASTnode *optAST(ASTnode * n);
+
+// cgen.c
+public int cgalloctemp(void);
+public void cglabel(int l);
+public void cgjump(int l);
+public int cgalign(Type * ty, int offset);
+public void cgstrlit(int label, char *val, bool is_const);
+public void cg_file_preamble(void);
+public void cg_func_preamble(Sym * func);
+public void cg_func_postamble(Type * ty);
+public void cgglobsym(Sym * sym, bool make_zero);
+public void cgglobsymval(ASTnode * value, int offset);
+public void cgglobsymend(Sym * sym);
+public void cgloadboolean(int t, int val, Type * ty);
+public int cgloadlit(Litval * value, Type * ty);
+public int cgadd(int t1, int t2, Type * ty);
+public int cgsub(int t1, int t2, Type * ty);
+public int cgmul(int t1, int t2, Type * ty);
+public int cgdiv(int t1, int t2, Type * ty);
+public int cgmod(int t1, int t2, Type * ty);
+public int cgnegate(int t, Type * ty);
+public int cgcompare(int op, int t1, int t2, Type * ty);
+public void cgjump_if_false(int t1, int label);
+public int cgnot(int t, Type * ty);
+public int cginvert(int t, Type * ty);
+public int cgand(int t1, int t2, Type * ty);
+public int cgor(int t1, int t2, Type * ty);
+public int cgxor(int t1, int t2, Type * ty);
+public int cgshl(int t1, int t2, Type * ty);
+public int cgshr(int t1, int t2, Type * ty);
+public int cgloadvar(Sym * sym);
+public int cgstorvar(int t, Type * exprtype, Sym * sym);
+public void cgaddlocal(Type * ty, Sym * sym, int size, bool makezero,
+		bool isarray);
+public int cgcall(Sym * sym, int numargs, int excepttemp, int *arglist,
+	   Type ** typelist);
+public void cgreturn(int temp, Type * ty);
+public void cgabort(void);
+public int cgloadglobstr(int label);
+public int cgaddress(Sym * sym);
+public int cgderef(int t, Type * ty);
+public int cgstorderef(int t1, int t2, Type * ty);
+public int cgboundscheck(int t1, int count, int aryname, int funcname);
+public void cgmove(int t1, int t2, Type * ty);
+public void cg_vastart(ASTnode *n);
+public void cg_vaend(ASTnode *n);
+public int cg_vaarg(ASTnode *n);
+public int cgcast(int exprtemp, Type *ety, Type *ty, int funcname);
+
+// expr.c
+public ASTnode *binop(const ASTnode * l, const ASTnode * r, const int op);
+public ASTnode *unarop(const ASTnode * l, const int op);
+public ASTnode *widen_expression(const ASTnode * e, const Type * ty);
+public ASTnode *get_array_element(ASTnode * n, ASTnode * e);
+
+// funcs.c
+public bool add_function(const ASTnode * func,
+			ASTnode * paramlist, const int visibility);
+public void declare_function(const ASTnode * f, const int visibility);
+public void gen_func_statement_block(const ASTnode * s);
+
+// genast.c
+public int genlabel(void);
+public int genAST(const ASTnode * n);
+public int genalign(const Type * ty, const int offset);
+public void gen_file_preamble(void);
+public void gen_func_preamble(const Sym * func);
+public void gen_func_postamble(const Type * ty);
+
+// lexer.c
+public bool scan(Token * t);
+public char *get_tokenstr(const int token);
+public void dumptokens(void);
+public void match(const int t, const bool getnext);
+public void semi(void);
+public void lbrace(void);
+public void rbrace(void);
+public void lparen(void);
+public void rparen(void);
+public void ident(void);
+public void comma(void);
+
+// misc.c
+public void fatal(const char *fmt, ...);
+public void cant_do(const ASTnode * n, const Type * t, const char *msg);
+public void *Malloc(const size_t size);
+public void *Calloc(const size_t size);
+
+// parser.c
+public void input_file(void);
+
+// strlits.c
+public int add_strlit(const char *name, const bool is_const);
+public void gen_strlits(void);
+
+// stmts.c
+public ASTnode *assignment_statement(ASTnode * v, ASTnode * e);
+public ASTnode *declaration_statement(ASTnode * s, ASTnode * e);
+
+// syms.c
+public void init_symtable(void);
+public Sym *add_sym_to(Sym ** head, char *name, int symtype, Type * ty);
+public Sym *add_symbol(char *name, int symtype, Type * ty, int visibility);
+public Sym *find_symbol(char *name);
+public void new_scope(Sym * func);
+public void end_scope(void);
+public ASTnode *mkident(ASTnode * n);
+public bool is_array(Sym * sym);
+public void gen_globsyms(void);
+public void dumpsyms(void);
+
+// types.c
+public void init_typelist(void);
+public Type *new_type(int kind, int size, int ptr_depth, char *name, Type * base);
+public Type *find_type(char *typename, int kind, int ptr_depth);
+public Type *pointer_to(Type * ty);
+public Type *value_at(Type * ty);
+public bool is_integer(Type * ty);
+public bool is_flonum(Type * ty);
+public bool is_numeric(Type * ty);
+public bool is_pointer(Type * ty);
+public bool is_struct(Type * ty);
+public char *get_typename(Type * ty);
+public ASTnode *widen_type(ASTnode * node, Type * ty, int op);
+public void add_type(ASTnode * node);
+public Type *parse_litval(Litval * e);

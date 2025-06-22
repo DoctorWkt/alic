@@ -68,6 +68,7 @@ procedural_stmts= ( assign_stmt
                   | if_stmt
                   | while_stmt
                   | for_stmt
+                  | foreach_stmt
                   | return_stmt
                   | abort_stmt
                   | break_stmt
@@ -94,9 +95,16 @@ if_stmt= IF LPAREN expression RPAREN statement_block
 while_stmt= WHILE LPAREN expression RPAREN statement_block
           | WHILE LPAREN TRUE RPAREN statement_block
 
-for_stmt= FOR LPAREN short_assign_stmt? SEMI
-                     expression? SEMI
-                     short_assign_stmt? RPAREN statement_block
+for_stmt= FOR LPAREN (LBRACE procedural_stmts RBRACE | short_assign_stmt)?
+                      SEMI expression? SEMI
+                     (LBRACE procedural_stmts RBRACE | short_assign_stmt)?
+              RPAREN statement_block
+
+foreach_stmt= FOREACH postfix_variable LPAREN
+              ( postfix_variable
+              | expression ELLIPSIS expression
+              | postfix_variable COMMA postfix_variable
+              ) RPAREN statement_block
 
 return_stmt= RETURN LPAREN expression RPAREN SEMI
            | RETURN SEMI
