@@ -284,7 +284,7 @@ without the need for casting.
 
 *(see [Part 9](../Part_09/Readme.md))*
 
-*alic* has structured types. One difference from C is that the list of members of a struct are separated by commas, not semicolons. Another difference is that unions can only be declared inside a struct, and the union itself has no name. Here is an example:
+*alic* has structured types. One difference from C is that the list of members in a struct are separated by commas, not semicolons. Another difference is that unions can only be declared inside a struct, and the union itself has no name. Here is an example:
 
 ```
 type FOO = struct {
@@ -399,9 +399,9 @@ To reduce any undefined behaviour, any variable declaration (local or non-local)
 
 The `const` keyword can be applied to:
 
-  * global variable declarations after any `extern` or `public`,
+  * non-local variable declarations (if marked `extern` or `public`, after this),
   * parameter and local variable declarations,
-  * before any string literals, and
+  * before any string literals,
   * struct members in the type definition, and
   * assignment statements.
 
