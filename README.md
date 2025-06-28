@@ -5,7 +5,9 @@ journey](https://github.com/DoctorWkt/acwj), I developed a self-compiling
 compiler for a subset of the C language. In this project, I want to
 design a simple procedural language and build a compiler for it.
 
-For details of what *alic* looks like, see the [docs/](docs/) directory and the example programs in the *tests* directory in the most recent part.
+For details of what *alic* looks like, see the [docs/](docs/) directory,
+especially the [overview of *alic*](docs/overview.md). Then look at the example
+programs in the *tests* directory in the most recent part.
 
 *alic* stands for "a language inspired by C". It's going to look quite
 a lot like C. I also want to be able to use the existing C library,
@@ -31,14 +33,12 @@ Here are the parts of the *alic* journey so far:
   * [Part 13](Part_13/Readme.md): Rewriting the *alic* Compiler in *alic*
   * [Part 14](Part_14/Readme.md): Adding `const` and `cast()` to *alic*
   * [Part 15](Part_15/Readme.md): Some More Loop Constructs
+  * [Part 16](Part_16/Readme.md): Associative Arrays
 
 If you just want to see the language features in *alic* which make it
-different than C, then you can check out these parts:
-[Part 6](Part_06/Readme.md), [Part 8](Part_08/Readme.md),
-[Part 9](Part_09/Readme.md), [Part 10](Part_10/Readme.md),
-[Part 11 (Switch Statements)](Part_11/Readme.md),
-[Part 12](Part_12/Readme.md), [Part 14](Part_14/Readme.md),
-[Part 15](Part_15/Readme.md).
+different than C, then skips parts 1-5 and 13 and read the other parts!
+Also read the [overview of *alic*](docs/overview.md) which covers the
+differences between C and *alic*.
 
 ## Building the Compiler
 

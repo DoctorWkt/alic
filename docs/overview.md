@@ -361,6 +361,75 @@ By default, an access into an array will be bounds checked. If the index is belo
 
 If you use array access via a pointer, there is no bounds checking.
 
+## Associative Arrays
+
+*(see [Part 16](../Part_16/Readme.md))*
+
+*alic* provides [associative arrays](https://en.wikipedia.org/wiki/Associative_array): in-memory dynamic key/value stores with the following operations:
+
+  * declare an associative array,
+  * add (or update) a key/value pair to the array,
+  * search the array with a key and get the associated value,
+  * delete a key from the array,
+  * test if a key/value pair exists in the array, and
+  * iterate over the values in an array.
+
+The value type can be any scalar value that fits into 64 bits: integers, floats, `bool` and pointers. The key type can be any integer type, `bool` and `int 8 *` (i.e. strings).
+
+To declare an associative array, you give the type of the value and key and name the array, e.g.
+
+```
+  int32 age[int8 *];        // Array of ages keyed by person's name
+  int8 *address[uint64];    // Array of address strings keyed by unsigned account number
+```
+
+To add a new key/value pair, or to update an existing key/value pair, use normal array syntax, e.g.
+
+```
+   age["Fred"]= 23;
+   address[40325]= "101 Blah st, Foosville";
+```
+
+To get a value given a key, again use normal array syntax, e.g.
+
+```
+   if (age["Fred"] > 19) printf("Fred is no longer a teenager\n");
+   printf("Account %ld, address %s\n", acct, address[acct]);
+```
+
+Note that if you try to get a value when the key doesn't exist, you will receive the value 0 (or `NULL` if the value type is a pointer). To properly tell if the key exists in the array, use the `exists()` pseudo-function which returns `bool`, e.g.
+
+```
+   if (exists(address[acct]))
+      printf("Account %ld, address %s\n", acct, address[acct]);
+   else
+      printf("Account %ld has no address\n");
+```
+
+To delete a key in an associative array, use the `undef()` statement, e.g.
+
+```
+   undef(address[11112]);
+```
+
+You are permitted to delete keys that don't exist in the array.
+
+To iterate over all the values in an associate array, use `foreach()`, e.g.
+
+```
+   int32 a;
+
+   foreach a (age) printf("age %d in the list\n", a);
+```
+
+### Associative Array Notes
+
+If you use pointer keys or values, remember that only the pointer values are stored in the associative array, not what they point at.
+
+If you use a string as the key for an associative array, *alic* uses the [djb2 hash function](http://www.cse.yorku.ca/~oz/hash.html) to create a 64-bit key value to represent the string. There is a very small, but non-zero, chance that two strings will generate the same key value.
+
+When iterating over the values in an associative array, there is no guarantee of any specific ordering of the values.
+
 ## Initialising Variables
 
 For non-local variables, including arrays and structs, you can provide either a single value known at compile time, or a `{` ... `}` list of values separated by commas. If you have nested data structures, you can nest `{` ... `}`. For example:

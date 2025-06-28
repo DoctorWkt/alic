@@ -42,9 +42,11 @@ function_prototype= typed_declaration LPAREN
 
 typed_declaration_list= typed_declaration (COMMA typed_declaration_list)*
 
-array_typed_declaration= typed_declaration (array_size)?
+array_typed_declaration= typed_declaration (array_size | assoc_keytype)?
 
 array_size= LBRACKET NUMLIT RBRACKET
+
+assoc_keytype= LBRACKET type RBRACKET
 
 typed_declaration= CONST? type IDENT
 
@@ -78,6 +80,7 @@ procedural_stmts= ( assign_stmt
                   | fallthru_stmt
                   | va_start_stmt
                   | va_end_stmt
+                  | undef_stmt
                   | function_call SEMI
                   )*
 
@@ -135,6 +138,8 @@ function_call= IDENT LPAREN expression_list? RPAREN
 va_start_stmt= VA_START LPAREN IDENT RPAREN SEMI
 
 va_end_stmt= VA_END LPAREN IDENT RPAREN SEMI
+
+undef_stmt= UNDEF LPAREN postfix_expression RPAREN SEMI
 
 bracketed_expression_list= LBRACE bracketed_expression_element
                                   (COMMA bracketed_expression_element)*
@@ -212,6 +217,7 @@ primary_expression= NUMLIT
                   | sizeof_expression
                   | va_arg_expression
                   | cast_expression
+                  | exists_expression
                   | postfix_variable
                   | function_call
                   | LPAREN expression RPAREN
@@ -222,6 +228,8 @@ sizeof_expression= SIZEOF LPAREN type RPAREN
 va_arg_expression= VA_ARG LPAREN IDENT COMMA type RPAREN
 
 cast_expression= CAST LPAREN expression COMMA type PAREN
+
+exists_expression= EXISTS LPAREN postfix_variable RPAREN
 
 postfix_variable= IDENT
                 | postfix_variable DOT IDENT

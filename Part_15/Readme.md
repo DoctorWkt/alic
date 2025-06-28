@@ -290,7 +290,12 @@ I actually like the list walking loop: I'd rather write the last two lines above
 
 ## Conclusion and The Next Step
 
-Well, this was a short part of the *alic* journey. I got all the changes to the language and compilers done in a day. I'm also starting to run out of ideas for new things to add to *alic*!
+Well, this was a short part of the *alic* journey. I got all the changes to the language and compilers done in a day. 
 
-So I'll post this incomplete part up on Github and add more here once I think of things to do.
+Next up, I'm going to add associative arrays to *alic*.
 
+## Post Scriptum
+
+As this was short, I thought I'd throw a few more words in at the end. I started writing C code in the late 1980s. Then, as now, my development environment is the `vi` editor, `gdb` at the command-line, and command-line tools such as `grep`, `less` etc. My version control system is now command-line `git` and I use `gitk` to browse back through old versions and changes.
+
+I've just recently started using [meld](https://meldmerge.org/) to see the code changes between my current version of *alic* and the ones that I've posted up on GitHub. It helps me to remember what I've changed, so I (hopefully) write about the more important changes here!
