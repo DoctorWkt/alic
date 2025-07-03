@@ -757,7 +757,7 @@ The expression `rand() & 0xFF` can create random numbers in the range 0 .. 255, 
 
 ## Regular Expressions
 
-*alic* provides two functions that make it reasonably easy to use regular expressions. These are in `<regex.ah>:
+*alic* provides two functions that make it reasonably easy to use regular expressions. These are in `<regex.ah>`:
 
 ```
 int8 *** grep(int8 *src, int8 *search);
