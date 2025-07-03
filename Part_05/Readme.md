@@ -385,7 +385,7 @@ Now I just return a `Type` pointer and I don't go through the pain of making an 
 
 ## Error Checking
 
-Another big advantage of a hand-written parser is that we can do better error checking. I've already mentioned the checking of the syntaxtic sugar tokens. You can see, above, that I now have some code to stop the parsing if we hit a token that isn't a known type token. In [parser.c](parser.c) there are a few other calls to `fatal()` when we detect a syntax error in the input. Looking at my *acwj* parsing code, I can see a whole bunch of other error checks that will eventually end up here in *alic*.
+Another big advantage of a hand-written parser is that we can do better error checking. I've already mentioned the checking of the syntactic sugar tokens. You can see, above, that I now have some code to stop the parsing if we hit a token that isn't a known type token. In [parser.c](parser.c) there are a few other calls to `fatal()` when we detect a syntax error in the input. Looking at my *acwj* parsing code, I can see a whole bunch of other error checks that will eventually end up here in *alic*.
 
 ## Conclusion and The Next Step
 

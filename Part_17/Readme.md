@@ -64,7 +64,7 @@ declaration_stmts= ( ( array_typed_declaration
                      )*
 ```
 
-And a local declaration statement can now be a function pointer declaration followed an optional initialisation.
+And a local declaration statement can now be a function pointer declaration followed by an optional initialisation.
 
 ## Parsing the Above
 
