@@ -1,6 +1,7 @@
 input_file= ( type_declaration
             | enum_declaration
             | global_var_declaration
+            | function_pointer_declaration
             | function_declaration
             )* EOF
 
@@ -28,6 +29,11 @@ visibility= ( PUBLIC | EXTERN )?
 
 global_var_declaration= visibility array_typed_declaration
                         decl_initialisation? SEMI
+
+function_pointer_declaration= typed_declaration STAR LPAREN
+                            ( typed_declaration_list (COMMA ELLIPSIS)?
+                            | VOID
+                            ) RPAREN (THROWS typed_declaration )?
 
 decl_initialisation= ASSIGN expression
                    | ASSIGN bracketed_expression_list
@@ -62,8 +68,10 @@ user_defined_type= IDENT
 statement_block= LBRACE declaration_stmts procedural_stmts RBRACE
                | procedural_stmt
 
-declaration_stmts= ( array_typed_declaration decl_initialisation
-                   | array_typed_declaration SEMI
+declaration_stmts= ( ( array_typed_declaration 
+                     | function_pointer_declaration
+                     )
+                     decl_initialisation? SEMI
                    )*
 
 procedural_stmts= ( assign_stmt
@@ -86,7 +94,7 @@ procedural_stmts= ( assign_stmt
 
 assign_stmt= short_assign_stmt SEMI
 
-short_assign_stmt= postfix_variable ASSIGN expression
+short_assign_stmt= unary_expression ASSIGN expression
                  | postfix_variable ASSIGN CONST
                  | postfix_variable POSTINC
                  | postfix_variable POSTDEC
@@ -107,6 +115,7 @@ foreach_stmt= FOREACH postfix_variable LPAREN
               ( postfix_variable
               | expression ELLIPSIS expression
               | postfix_variable COMMA postfix_variable
+              | function_call
               ) RPAREN statement_block
 
 return_stmt= RETURN LPAREN expression RPAREN SEMI

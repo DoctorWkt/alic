@@ -93,7 +93,7 @@ You *can't* use `break` in a `switch` statement: see below for details.
 
 *(see [Part 15](../Part_15/Readme.md))*
 
-There are three flavours of `foreach` loops which are essentially syntactic sugar versions of `for` loops.
+There are four flavours of `foreach` loops which are essentially syntactic sugar versions of `for` loops.
 
 The first is to iterate over array elements:
 
@@ -116,7 +116,7 @@ The second is to iterate across an *inclusive* range of values:
     printf("%d\n", i);
 ```
 
-And the third is to walk a linked list:
+The third is to walk a linked list:
 
 ```
 type FOO = struct {
@@ -133,6 +133,69 @@ FOO *Head;
   foreach this (Head, this.next)
     printf("%d\n", this.value);
 ```
+
+## Iterator Functions
+
+The fourth flavour of `foreach` is to call an *iterator* function and walk the list of values that it returns, e.g.
+
+```
+  uint32 x;
+
+  foreach x (factors(60))
+    printf("%2d is a factor of 60\n", x);
+```
+
+This requires that the iterator function return a data structure like this (for `factors(6))`:
+
+![iterator data structure](figs/iterlist.png)
+
+
+The top row is a contiguous list of pointers to `uint32` values with the last pointer set to NULL. This list was `malloc()`'d by the iterator function. Below that are the `uint32` values that hold the actual factors of 6; these also have been `malloc()`'d by the function.
+
+If there are no elements to return from an iterator function, it can return NULL.
+
+The `foreach` loop will free the top list of pointers and every `malloc()`'d node on the bottom row.
+
+## Switch Statements
+
+*(see [Part 11](../Part_11/Readme.md))*
+
+These look the same as C switch statements, but there is a **big** difference: cases do not fall through to the next case; instead, they jump to the end of the switch statement. If you want to fall through to the next case, you need to use the `fallthru` keyword. Also, the `break` statement is **not** used in a switch statement; it is only used for loops.
+
+Here is an example *alic* program that demonstrates the switch statement and its output:
+
+```
+#include <stdio.ah>
+
+public void main(void) {
+  int32 x;
+
+  for (x=1; x <= 9; x= x + 1) {
+    switch(x) {
+      case  3: printf("case 3\n");
+      case  5:
+      case  6: printf("case %d, fallthru to ...\n",x);
+	       fallthru;
+      case  7: printf("case 7\n");
+      default: printf("case %d, default\n", x);
+    }
+  }
+}
+
+case 1, default
+case 2, default
+case 3
+case 4, default
+case 5, fallthru to ...
+case 7
+case 6, fallthru to ...
+case 7
+case 7
+case 8, default
+case 9, default
+```
+
+You can also use string (i.e. pointer to `int8`) expressions in a switch statement and string literals as case values. These will be hashed to `uint64` integer values with the [djb2 hash function](http://www.cse.yorku.ca/~oz/hash.html), so there is a small but non-zero chance that there is a collision between your expression and a different string literal case value.
 
 ## Functions and Function Calling
 
@@ -202,6 +265,40 @@ int16 foobar(int8 *fmt, ...) {
 ```
 
 Depending on your platform's ABI, variadic arguments will be widened to meet minimum sizes. On the 64-bit Intel/AMD platform, integers are widened to be at least 32 bits and floats are widened to be 64 bits. You cannot use integer/floating types smaller than these with `va_arg()`.
+
+## Function Pointers
+
+*alic* provides function pointers, but the declaration syntax is different to C. Essentially, a function pointer declaration looks like a function prototype except that there is a '*' immediately after the function pointer's name. For example:
+
+```
+int32 foo(int8 *name, bool is_irregular);    // A function prototype
+int32 fred* (int8 *name, bool is_irregular); // A function pointer called fred
+```
+
+Function pointers can be declared outside of a function (with no initialisation), or as a local variable with an initialisation. Here is an example of the latter:
+
+```
+int32 foo(int8 *name, bool is_iregular) { return(1); }
+
+public void main(void) {
+
+  // Function pointer and assignment
+  int32 fred *(int8 *name, bool is_iregular) = foo;
+```
+
+Once you have a function pointer, you point it at a function with an assignment statement that names the function, e.g.
+
+```
+  fred= foo;
+```
+
+The number and type of function parameters must match.
+
+To call via a function pointer, treat the function pointer's name as a function name. e.g
+
+```
+  x= fred("hello", true);
+```
 
 ## Header Files
 
@@ -634,45 +731,6 @@ If any function in the `try` block throws an exception, the exception variable h
 
 You can call functions that throw exceptions in the `catch` block as well. However, nothing will happen to the flow of execution in the `catch` block. All that will happen is that your exception variable will be altered by the function that threw the exception.
 
-## Switch Statements
-
-*(see [Part 11](../Part_11/Readme.md))*
-
-These look the same as C switch statements, but there is a **big** difference: cases do not fall through to the next case; instead, they jump to the end of the switch statement. If you want to fall through to the next case, you need to use the `fallthru` keyword. Also, the `break` statement is **not** used in a switch statement; it is only used for loops.
-
-Here is an example *alic* program that demonstrates the switch statement and its output:
-
-```
-#include <stdio.ah>
-
-public void main(void) {
-  int32 x;
-
-  for (x=1; x <= 9; x= x + 1) {
-    switch(x) {
-      case  3: printf("case 3\n");
-      case  5:
-      case  6: printf("case %d, fallthru to ...\n",x);
-	       fallthru;
-      case  7: printf("case 7\n");
-      default: printf("case %d, default\n", x);
-    }
-  }
-}
-
-case 1, default
-case 2, default
-case 3
-case 4, default
-case 5, fallthru to ...
-case 7
-case 6, fallthru to ...
-case 7
-case 7
-case 8, default
-case 9, default
-```
-
 ## The `cast()` Pseudo-function
 
 *(see [Part 14](../Part_14/Readme.md))*
@@ -696,6 +754,45 @@ If the expression's value at run-time is outside the range of the destination ty
 The expression `rand() & 0xFF` can create random numbers in the range 0 .. 255, but `int8` has the range -1 .. 127. Any value over 127 will cause a run-time error.
 
 `cast()` can convert (with run-time checking) all ten numeric types to all ten numeric types.
+
+## Regular Expressions
+
+*alic* provides two functions that make it reasonably easy to use regular expressions. These are in `<regex.ah>:
+
+```
+int8 *** grep(int8 *src, int8 *search);
+int8 *   sed(int8 *src, int8 *search, int8 *replace);
+```
+
+The first one is an *iterator* function and the second returns either the string with the replacement or NULL. Here is an example:
+
+```
+public void main(void) {
+  int8 *str;
+
+  int8 *src=     "This is a string with a date: 12/25/2019";
+  int8 *regex=   "([0-9]+)/([0-9]+)/([0-9]+)";
+  int8 *replace= "$2/$1/$3";
+
+  foreach str (grep(src, regex))
+    printf("%s\n", str);
+
+  str = sed(src, regex, replace);
+  if (str != NULL)
+    printf("Replaced with %s\n", str);
+  else
+    printf("No replacement\n");
+}
+```
+
+which prints out:
+
+```
+12
+25
+2019
+Replaced with This is a string with a date: 25/12/2019
+```
 
 ## Example *alic* Programs
 

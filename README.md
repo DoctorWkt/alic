@@ -34,6 +34,7 @@ Here are the parts of the *alic* journey so far:
   * [Part 14](Part_14/Readme.md): Adding `const` and `cast()` to *alic*
   * [Part 15](Part_15/Readme.md): Some More Loop Constructs
   * [Part 16](Part_16/Readme.md): Associative Arrays
+  * [Part 17](Part_17/Readme.md): Strings in Switch, Function Pointers, Iterator Functions and Regular Expressions
 
 If you just want to see the language features in *alic* which make it
 different than C, then skips parts 1-5 and 13 and read the other parts!
