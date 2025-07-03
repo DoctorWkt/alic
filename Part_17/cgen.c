@@ -673,7 +673,7 @@ int cgcall(Sym * sym, int numargs, int excepttemp, int *arglist,
 
     // If the function is variadic, QBE requires a '...'
     // after the last non-variadic argument
-    if (i == sym->count -1)
+    if ((sym->is_variadic == true) && (i == sym->count -1))
       fprintf(Outfh, ", ... ");
 
     // Output any separating comma
