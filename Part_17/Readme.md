@@ -241,7 +241,7 @@ public void main(void) {
     printf("%d is a factor of 6\n", x);
 ```
 
-Because we are still interfacing with the existing C library, I had to come up with a way for an interator function to return a useable list that we can walk across. Consider this code:
+Because we are still interfacing with the existing C library, I had to come up with a way for an iterator function to return a useable list that we can walk across. Consider this code:
 
 ```
   uint32 ** listptr= factors(6);   // Get a list of the factors of 6
@@ -356,8 +356,8 @@ gets translated to:
   %.t78 =w cnel %.t77, %.t75
   jnz %.t78, @L29, @L28
 @L29
-  %.t79 =w loaduw %.t77                 # Derefernce *element
-  storew %.t79, %x                      # Assign **element to loop variable
+  %.t79 =w loaduw %.t77                 # Dereference *element
+  storew %.t79, %x                      # Assign **element to the loop variable
   %.t80 =l copy $L30                    # The programmer's loop body
   %.t81 =w loaduw %x
   %.t82 =w call $printf(l %.t80, w %.t81)
