@@ -5,14 +5,14 @@ journey](https://github.com/DoctorWkt/acwj), I developed a self-compiling
 compiler for a subset of the C language. In this project, I want to
 design a simple procedural language and build a compiler for it.
 
-For details of what *alic* looks like, see the [docs/](docs/) directory,
-especially the [overview of *alic*](docs/overview.md). Then look at the example
-programs in the *tests* directory in the most recent part.
-
 *alic* stands for "a language inspired by C". It's going to look quite
 a lot like C. I also want to be able to use the existing C library,
 so *alic* has to be ABI compatible with C. But I want to try out some
 new language ideas and see if they work or not.
+
+For details of what *alic* looks like, see the [docs/](docs/) directory,
+especially the [overview of *alic*](docs/overview.md). Then look at the example
+programs in the *tests* and *examples* directories in the most recent part.
 
 In this journey I'm going to have fewer, bigger chunks of development
 than I did with [acwj](https://github.com/DoctorWkt/acwj).
