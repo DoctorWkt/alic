@@ -1,0 +1,11 @@
+#ifndef _TIME_AH
+# define _TIME_AH
+
+#include <sys/types.ah>
+
+type timespec = struct {
+  time_t tv_sec,
+  time_t tv_nsec
+};
+
+#endif	// _TIME_AH

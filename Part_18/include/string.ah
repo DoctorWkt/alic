@@ -1,0 +1,22 @@
+#ifndef _STRING_AH
+# define _STRING_AH
+
+#include <sys/types.ah>
+#include <stddef.ah>
+
+char *strdup(char *s);
+char *strchr(char *s, int c);
+char *strrchr(char *s, int c);
+char *strdup(char *s);
+int strcmp(char *s1, char *s2);
+int strncmp(char *s1, char *s2, size_t n);
+char *strerror(int errnum);
+size_t strlen(char *s);
+char *strstr(char *haystack, char *needle);
+char *strcpy(char *dst, char *src);
+char *strcat(char *dst, char *src);
+char *strncat(char *dst, char *src, size_t sz);
+
+void *memcpy(void *dest, void *src, size_t n);
+
+#endif	// _STRING_H_

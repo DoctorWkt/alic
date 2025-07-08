@@ -1,13 +1,14 @@
 input_file= ( type_declaration
             | enum_declaration
             | global_var_declaration
-            | function_pointer_declaration
             | function_declaration
             )* EOF
 
 type_declaration= TYPE IDENT SEMI
-                | TYPE IDENT ASSIGN type SEMI
+                | TYPE IDENT ASSIGN type integer_range? SEMI
                 | TYPE IDENT ASSIGN struct_declaration SEMI
+
+integer_range= RANGE NUMLIT ... NUMLIT
 
 enum_declaration= ENUM LBRACE enum_list RBRACE SEMI
 
@@ -30,11 +31,6 @@ visibility= ( PUBLIC | EXTERN )?
 global_var_declaration= visibility array_typed_declaration
                         decl_initialisation? SEMI
 
-function_pointer_declaration= typed_declaration STAR LPAREN
-                            ( typed_declaration_list (COMMA ELLIPSIS)?
-                            | VOID
-                            ) RPAREN (THROWS typed_declaration )?
-
 decl_initialisation= ASSIGN expression
                    | ASSIGN bracketed_expression_list
 
@@ -54,7 +50,7 @@ array_size= LBRACKET NUMLIT RBRACKET
 
 assoc_keytype= LBRACKET type RBRACKET
 
-typed_declaration= CONST? type IDENT
+typed_declaration= CONST? INOUT? type IDENT
 
 type= (builtin_type | user_defined_type) STAR*
 
@@ -68,10 +64,7 @@ user_defined_type= IDENT
 statement_block= LBRACE declaration_stmts procedural_stmts RBRACE
                | procedural_stmt
 
-declaration_stmts= ( ( array_typed_declaration 
-                     | function_pointer_declaration
-                     )
-                     decl_initialisation? SEMI
+declaration_stmts= ( array_typed_declaration decl_initialisation? SEMI
                    )*
 
 procedural_stmts= ( assign_stmt

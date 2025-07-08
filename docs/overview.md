@@ -6,6 +6,28 @@ This document refers to the latest version of *alic* in the *alic* journey.
 
 If I don't mention a feature here, and if you can't see it in *alic*'s [grammar definition](grammar.txt), then *alic* doesn't have the feature.
 
+## The tl;dr Comparison Against C
+
+  * Types have sizes: `int8`, `uint16`, `flt32` etc.
+  * `bool` isn't an integer type. `true`, `false` and `NULL` are built in.
+  * Enums are just a way of naming integer values.
+  * A nicer syntax for defining structs and unions.
+  * Built-in types can be renamed with ranges, e.g. `type age= uint8 range 0 ... 120;`. Range checking is done at runtime.
+  * Assignments are *not* expressions, only statements.
+  * *alic* has several `foreach` loop variants.
+  * Functions can be called with named arguments, e.g. `fred(z=12, y="hi", x=2.34);`
+  * `inout` function parameters allow functions to return multiple values.
+  * Arrays are fixed in size; their indexes are bounds checked at runtime.
+  * Type casting is done with `cast()` which does range checking at runtime.
+  * *alic* has built-in associative arrays, e.g. `age["Fred"]=23;`
+  * `switch` values can be strings, e.g. `switch(name) { case "Mary": ... }`
+  * Variables with no initial value are set to all zero bits, even locals.
+  * The `const` keyword is more powerful.
+  * *alic* has exception handling, e.g. `try(foo) { <code> } catch { ... foo.errnum ... }`
+  * Easy to use regular expression support, but not built in to *alic*.
+  * Compatible with the C ABI.
+  * Limitation: only 1-dimensional arrays at present.
+
 ## Built-in Types
 
 *(see [Part 1](../Part_01/Readme.md))*
@@ -34,6 +56,154 @@ There is a `void *` type. This is a type that can be assigned a pointer of any t
 
 `NULL` is built into the *alic* language and is a `void *` pointer with the value 0.
 
+## Enums
+
+An `enum` in *alic* is **not** a type; it's just a way to give names to integer values, e.g.
+
+```
+enum { a, b, c=25, d, e= -34, f, g };
+```
+
+`a` is the constant 0, `b` is 1, `c` and `e` as shown, `d` is 26, `f` is -33 and `g` is -32.
+
+## User-defined Types
+
+*(see [Part 8](../Part_08/Readme.md))*
+
+You can define new types in *alic* by using the `type` keyword. You can define opaque types, type aliases and structured types.
+
+## Opaque Types
+
+An opaque type has a name but no details about its size or structure, e.g.
+
+```
+type FILE;
+```
+
+The idea here is that a library that has its own type (e.g. the standard I/O library) can keep the details of the type hidden: only the existence of the type is given in a header file.
+
+While you cannot declare a variable of opaque type in an *alic* program, you can declare a pointer to the type, e.g.
+
+```
+  FILE *input_filehandle;
+```
+
+Thus, you can receive a pointer to a `FILE` from a library function, and send a pointer to a library function, but never see the internal details of the type.
+
+## Type Aliases
+
+*alic* allows type aliases, e.g.
+
+```
+type char = int8;
+type String = char *;
+```
+
+## Integer Types with Ranges
+
+You can define integer types with specific ranges, e.g.
+
+```
+type seconds =     int8   range 0 ... 59;
+type nanoseconds = uint32 range 0 ... 999999999;
+type freq_offset = int16  range -2000 ... 2000;
+```
+
+The given range is *inclusive* and must fit into the given base integer type: you cannot say `int8 range -3000 ... 60000`, for example.
+
+When you declare a variable (i.e. a scalar, list, struct member etc.) with a ranged type, any assignment to that variable will be range checked at run-time. Hence:
+
+```
+public void main(void) {
+  seconds S;
+
+  S= 53;      // Will be fine
+  S= 100;     // Will crash the program when it runs with an error message
+}
+```
+
+Due to limitations of the existing compiler, a variable with no initialisation
+will be initialised to all zero bits, even if the variable's type does not
+have zero in its range. Also, the available range for any type must fall in the values -9223372036854775808 to 9223372036854775807 inclusive.
+
+## void *
+
+There is a built-in type which is `void *`. You can declare variables of this type and you can
+declare functions that return this type.
+
+You can assign a `void *` value to any pointer type, and you can assign any pointer type value to
+a `void *` variable. This is useful to do things like this:
+
+```
+void *malloc(size_t size);
+
+void main(void) {
+  int32 *fred;
+
+  fred= malloc(100 * sizeof(int32));
+}
+```
+
+without the need for casting.
+
+## Structured Types
+
+*(see [Part 9](../Part_09/Readme.md))*
+
+*alic* has structured types. One difference from C is that the list of members in a struct are separated by commas, not semicolons. Another difference is that unions can only be declared inside a struct, and the union itself has no name. Here is an example:
+
+```
+type FOO = struct {
+  int32 a,
+  flt32 b,
+  union { flt64 x, int16 y, bool z },
+  bool c
+};
+```
+
+If you now declare a variable, then you can do this:
+
+```
+  FOO var;
+
+  var.a = 5;
+  var.x = 3.2;
+  var.c = true;
+```
+
+## Pointers
+
+*alic* has pointers which are declared using the normal C syntax. The `&` operator gets the address of a variable, and the `*` operator dereferences a pointer to get the value that it points at.
+
+The C syntax for accessing a struct's member through a pointer is the '`->`' operator. This does **not** exist in *alic*. You can use the '.' operator instead.
+
+Consider the `FOO var` variable above. Let's take a pointer to it:
+
+```
+  FOO var;
+  FOO *ptr;
+
+  ptr= &var;      // Get a pointer to var
+
+  var.a= 5;       // Set one of the var member values
+
+                  // Access the same member through the pointer
+  printf("We can print out %d\n", ptr.a);
+```
+
+## Array Access with Pointers
+
+You can use a pointer as the base of an array:
+
+```
+  int32 *ptr= malloc(100 * sizeof(int32));
+  ptr[5]= 23;
+  printf("%d\n", ptr[5]);
+```
+
+## Header Files
+
+The *alic* compiler invokes the C-preprocessor on the input files, so you can include header files in your programs. The *include* directory in each part holds a number of header files. Their suffix is `.ah` to distinguish them from C header files.
 
 ## Operators and Precedence
 
@@ -73,7 +243,7 @@ Similarly, *alic* has post-increment and post-decrement **statements** (not expr
 
 *(see [Part 2](../Part_02/Readme.md))*
 
-*alic* has four control statements: `if`, `while`, `for` and `switch`. They are much like the C equivalents.
+*alic* has five control statements: `if`, `while`, `for`, `switch` and `foreach`. The first four are much like the C equivalents.
 
 With `while` and `for` loops, the condition has to be a boolean expression (e.g. a comparison) or the constant `true`. You can't say `while(1)` but you can say `while(true)`.
 
@@ -227,6 +397,55 @@ then you can call it like this:
 
 If you choose to name arguments, you must name all of them.
 
+## Inout Function Parameters
+
+You can declare the parameters of a function to be "`inout`": this means that, instead of the value of the argument being copied into the parameter (i.e. [call by value](https://en.wikipedia.org/wiki/Evaluation_strategy#Call_by_value)), the argument's *address* is copied into the parameter to allow the function to modify the argument's value. This allows a function to return multiple values: its usual return value and also several `inout` parameters.
+
+Here is an example:
+
+```
+int32 fred(inout int32 a, int32 b) {
+  a++;                                // Note that a looks like a scalar, not a pointer
+  return(a + b);
+}
+
+public void main(void) {
+  int32 x=5;
+  int32 y=6;
+  int32 z=0;
+
+  printf("x %d y %d z %d\n", x, y, z);
+  z= fred(x, y);                       // x's address is copied to fred()
+  printf("x %d y %d z %d\n", x, y, z);
+```
+
+In the `fred()` function, parameter `a` looks like a normal `int32` scalar variable but it is actually a pointer to the `int32` argument to the function. Thus, when the code does `a++`, it is really incrementing the `x` variable in `main()` as `x` is the first argument to `fred()`.
+
+The first `printf()` statement prints `x 5 y 6 z 0`. When `fred()` is called, `x` gets incremented and the return value is `6 + 6` i.e. 12. Thus, the second `printf()` statement prints `x 6 y 6 z 12`.
+
+You can also pass `inout` structs to a function, e.g.
+
+```
+type FOO = struct { int32 g, int8 h, bool i };
+
+int32 fred(inout FOO a, int b) {
+  a.g = 100;
+  return(a.g + b);
+}
+
+public void main(void) {
+  FOO x;
+  int y;
+  int z;
+
+  x.g= 32; x.h= 23; x.i= false; y= 30;
+  z= fred(x, y);
+  // x.g is now 100
+}
+```
+
+**Note:** Because an `inout` function parameter is really the address of the argument to the function, you should not use `inout` parameters with recursive functions. You won't get an independent variable in each instance of the function and this will corrupt the recursion.
+
 ## Variadic Functions
 
 A [variadic](https://en.wikipedia.org/wiki/Variadic_function) function is indicated by an ellipsis ( `...` ) at the end of the function's parameter list, e.g.
@@ -266,44 +485,6 @@ int16 foobar(int8 *fmt, ...) {
 
 Depending on your platform's ABI, variadic arguments will be widened to meet minimum sizes. On the 64-bit Intel/AMD platform, integers are widened to be at least 32 bits and floats are widened to be 64 bits. You cannot use integer/floating types smaller than these with `va_arg()`.
 
-## Function Pointers
-
-*alic* provides function pointers, but the declaration syntax is different to C. Essentially, a function pointer declaration looks like a function prototype except that there is a '*' immediately after the function pointer's name. For example:
-
-```
-int32 foo(int8 *name, bool is_irregular);    // A function prototype
-int32 fred* (int8 *name, bool is_irregular); // A function pointer called fred
-```
-
-Function pointers can be declared outside of a function (with no initialisation), or as a local variable with an initialisation. Here is an example of the latter:
-
-```
-int32 foo(int8 *name, bool is_iregular) { return(1); }
-
-public void main(void) {
-
-  // Function pointer and assignment
-  int32 fred *(int8 *name, bool is_iregular) = foo;
-```
-
-Once you have a function pointer, you point it at a function with an assignment statement that names the function, e.g.
-
-```
-  fred= foo;
-```
-
-The number and type of function parameters must match.
-
-To call via a function pointer, treat the function pointer's name as a function name. e.g
-
-```
-  x= fred("hello", true);
-```
-
-## Header Files
-
-The *alic* compiler invokes the C-preprocessor on the input files, so you can include header files in your programs. The *include* directory in each part holds a number of header files. Their suffix is `.ah` to distinguish them from C header files.
-
 ## Symbol Visibility
 
 *alic* has two keywords which affect the visibility of a symbol outside a function: `extern` and `public`. `extern` means the same as it does in C: a symbol is defined in another file. The `public` keyword indicates that a non-local symbol (e.g. a function or variable) should be made visible to other files.
@@ -313,124 +494,6 @@ By default, functions and non-local variables are marked as *not* visible to oth
 The aim here is to make it easier for a programmer to prevent "leakage" of symbol names. If you want a function or variable to be visible, you now have to mark it as `public`. You must also add `public` to function prototypes if they represent functions which must be visible across many source files.
 
 This also means that you **must** declare `main()` to be `public`!
-
-## Enums
-
-An `enum` in *alic* is **not** a type; it's just a way to give names to integer values, e.g.
-
-```
-enum { a, b, c=25, d, e= -34, f, g };
-```
-
-`a` is the constant 0, `b` is 1, `c` and `e` as shown, `d` is 26, `f` is -33 and `g` is -32.
-
-## User-defined Types
-
-*(see [Part 8](../Part_08/Readme.md))*
-
-You can define new types in *alic* by using the `type` keyword. You can define opaque types, type aliases and structured types.
-
-## Opaque Types
-
-An opaque type has a name but no details about its size or structure, e.g.
-
-```
-type FILE;
-```
-
-The idea here is that a library that has its own type (e.g. the standard I/O library) can keep the details of the type hidden: only the existence of the type is given in a header file.
-
-While you cannot declare a variable of opaque type in an *alic* program, you can declare a pointer to the type, e.g.
-
-```
-  FILE *input_filehandle;
-```
-
-Thus, you can receive a pointer to a `FILE` from a library function, and send a pointer to a library function, but never see the internal details of the type.
-
-## Type Aliases
-
-*alic* allows type aliases, e.g.
-
-```
-type char = int8;
-type String = char *;
-```
-
-## void *
-
-There is a built-in type which is `void *`. You can declare variables of this type and you can
-declare functions that return this type.
-
-You can assign a `void *` value to any pointer type, and you can assign any pointer type value to
-a `void *` variable. This is useful to do things like this:
-
-```
-void *malloc(size_t size);
-
-void main(void) {
-  int32 *fred;
-
-  fred= malloc(100 * sizeof(int32));
-}
-```
-
-without the need for casting.
-
-## Structured Types
-
-*(see [Part 9](../Part_09/Readme.md))*
-
-*alic* has structured types. One difference from C is that the list of members in a struct are separated by commas, not semicolons. Another difference is that unions can only be declared inside a struct, and the union itself has no name. Here is an example:
-
-```
-type FOO = struct {
-  int32 a,
-  flt32 b,
-  union { flt64 x, int16 y, bool z },
-  bool c
-};
-```
-
-If you now declare a variable, then you can do this:
-
-```
-  FOO var;
-
-  var.a = 5;
-  var.x = 3.2;
-  var.c = true;
-```
-
-## Pointers
-
-*alic* has pointers which are declared using the normal C syntax. The `&` operator gets the address of a variable, and the `*` operator dereferences a pointer to get the value that it points at.
-
-The C syntax for accessing a struct's member through a pointer is the '`->`' operator. This does **not** exist in *alic*. You can use the '.' operator instead.
-
-Consider the `FOO var` variable above. Let's take a pointer to it:
-
-```
-  FOO var;
-  FOO *ptr;
-
-  ptr= &var;      // Get a pointer to var
-
-  var.a= 5;       // Set one of the var member values
-
-                  // Access the same member through the pointer
-  printf("We can print out %d\n", ptr.a);
-```
-
-## Array Access with Pointers
-
-You can use a pointer as the base of an array:
-
-```
-  int32 *ptr= malloc(100 * sizeof(int32));
-  ptr[5]= 23;
-  printf("%d\n", ptr[5]);
-```
 
 ## Arrays
 
@@ -757,7 +820,7 @@ The expression `rand() & 0xFF` can create random numbers in the range 0 .. 255, 
 
 ## Regular Expressions
 
-*alic* provides two functions that make it reasonably easy to use regular expressions. These are in `<regex.ah>`:
+*alic* provides two functions that make it reasonably easy to use regular expressions. These are in `<regex.ah>:
 
 ```
 int8 *** grep(int8 *src, int8 *search);
