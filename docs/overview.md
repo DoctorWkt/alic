@@ -759,7 +759,7 @@ A function which throws an exception receives a pointer to a suitable exception 
 void *Malloc(size_t size) throws Exception *e {
   void *ptr= malloc(size);         // Try to malloc() the area
   if (ptr == NULL) {               // It failed
-     e.errno= ENOMEM;              // Set the int32 error to ENOMEM
+     e.errnum= ENOMEM;             // Set the int32 error to ENOMEM
      abort;                        // and throw the exception
   }
   return(ptr);                     // Otherwise return the valid pointer
@@ -783,7 +783,7 @@ For example:
     list= Malloc(23);
   }
   catch {
-    fprintf(stderr, "Could not allocate memory, error %d\n", foo.errno);
+    fprintf(stderr, "Could not allocate memory, error %d\n", foo.errnum);
     exit(1);
   }
 ```
@@ -820,7 +820,7 @@ The expression `rand() & 0xFF` can create random numbers in the range 0 .. 255, 
 
 ## Regular Expressions
 
-*alic* provides two functions that make it reasonably easy to use regular expressions. These are in `<regex.ah>:
+*alic* provides two functions that make it reasonably easy to use regular expressions. These are in `<regex.ah>`:
 
 ```
 int8 *** grep(int8 *src, int8 *search);
