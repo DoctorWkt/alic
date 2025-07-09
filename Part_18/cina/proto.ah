@@ -19,7 +19,7 @@ public void cgglobsym(Sym * sym, bool make_zero);
 public void cgglobsymval(ASTnode * value, int offset);
 public void cgglobsymend(Sym * sym);
 public void cgloadboolean(int t, int val, Type * ty);
-public int cgloadlit(Litval * value, Type * ty);
+public int cgloadlit(inout Litval value, Type * ty);
 public int cgadd(int t1, int t2, Type * ty);
 public int cgsub(int t1, int t2, Type * ty);
 public int cgmul(int t1, int t2, Type * ty);
@@ -86,7 +86,7 @@ public void gen_func_postamble(const Type * ty);
 public int gen_assign(int ltemp, int rtemp, ASTnode *n);
 
 // lexer.c
-public bool scan(Token * t);
+public bool scan(inout Token t);
 public char *get_tokenstr(const int token);
 public void dumptokens(void);
 public void match(const int t, const bool getnext);
@@ -119,7 +119,7 @@ public ASTnode *declaration_statement(ASTnode * s, ASTnode * e);
 
 // syms.c
 public void init_symtable(void);
-public Sym *add_sym_to(Sym ** head, char *name, int symtype, Type * ty);
+public Sym *add_sym_to(inout Sym * head, char *name, int symtype, Type * ty);
 public Sym *add_symbol(char *name, int symtype, Type * ty, int visibility);
 public Sym *find_symbol(char *name);
 public void new_scope(Sym * func);
@@ -143,5 +143,5 @@ public bool is_struct(Type * ty);
 public char *get_typename(Type * ty);
 public ASTnode *widen_type(ASTnode * node, Type * ty, int op);
 public void add_type(ASTnode * node);
-public Type *parse_litval(Litval * e);
+public Type *parse_litval(inout Litval e);
 public bool has_range(Type *ty);

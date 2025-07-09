@@ -350,7 +350,7 @@ void cgloadboolean(int t, int val, Type * ty) {
 
 // Load an integer literal value into a temporary.
 // Return the number of the temporary.
-int cgloadlit(Litval * value, Type * ty) {
+int cgloadlit(inout Litval value, Type * ty) {
   char *qtype;
 
   // Get a new temporary

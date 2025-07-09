@@ -453,7 +453,7 @@ void add_type(ASTnode * node) {
 }
 
 // Given an integer Litval , return a type that is suitable for it.
-Type *parse_litval(Litval * e) {
+Type *parse_litval(inout Litval e) {
 
   // If it's a float, return that
   if (e.numtype == NUM_FLT)

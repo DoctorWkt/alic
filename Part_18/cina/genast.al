@@ -140,7 +140,7 @@ public int genAST(const ASTnode * n) {
   // General processing
   switch (n.op) {
   case A_NUMLIT:
-    return (cgloadlit(&(n.litval), n.ty));
+    return (cgloadlit(n.litval, n.ty));
   case A_ADD:
   case A_ADDOFFSET:
     return (cgadd(lefttemp, righttemp, n.ty));
@@ -227,7 +227,7 @@ public int genAST(const ASTnode * n) {
     // the scale size is 2, 4 or 8.
     //
     // Get a temp with the size to scale
-    temp = cgloadlit(&(n.litval), ty_int64);
+    temp = cgloadlit(n.litval, ty_int64);
     return (cgmul(lefttemp, temp, n.ty));
   case A_FALLTHRU:
     if (Switchhead == NULL)
@@ -579,7 +579,7 @@ int gen_funccall(ASTnode * n) {
 
     // Get a literal zero into a temporary
     zero.intval = 0;
-    zerotemp = cgloadlit(&zero, ty_int32);
+    zerotemp = cgloadlit(zero, ty_int32);
 
     // Set the exception variable's first member to zero
     cgstorderef(zerotemp, excepttemp, ty_int32);
@@ -707,7 +707,7 @@ void gen_SWITCH(ASTnode * n) {
     // If this is not the default case
     if (c.op != A_DEFAULT) {
       // Jump to the next case test if the value doesn't match the case value
-      t2 = cgloadlit(&(c.litval), ty);
+      t2 = cgloadlit(c.litval, ty);
       t2 = cgcompare(A_EQ, temp, t2, ty);
       cgjump_if_false(t2, caselabel[i + 1]);
 

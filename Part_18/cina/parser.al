@@ -133,7 +133,7 @@ void type_declaration(void) {
   int64 upper= 0;
 
   // Skip the TYPE keyword
-  scan(&Thistoken);
+  scan(Thistoken);
 
   if (Thistoken.token != T_IDENT)
     fatal("Expecting a name after \"type\"\n");
@@ -142,12 +142,12 @@ void type_declaration(void) {
   typename = Thistoken.tokstr;
 
   // Skip the identifier
-  scan(&Thistoken);
+  scan(Thistoken);
 
   // If the next token is an '='
   if (Thistoken.token == T_ASSIGN) {
     // Skip the '='
-    scan(&Thistoken);
+    scan(Thistoken);
 
     // If the next token is STRUCT
     if (Thistoken.token == T_STRUCT) {
@@ -169,18 +169,18 @@ void type_declaration(void) {
       // Do we have a RANGE token? If so, parse
       // and get the lower and upper range
       if (Thistoken.token == T_RANGE) {
-        scan(&Thistoken);
+        scan(Thistoken);
         match(T_NUMLIT, false);
         if (Thistoken.litval.numtype == NUM_FLT)
           fatal("Cannot use a float literal in a range\n");
         lower= Thistoken.litval.intval;
-        scan(&Thistoken);
+        scan(Thistoken);
         match(T_ELLIPSIS, true);
         match(T_NUMLIT, false);
         if (Thistoken.litval.numtype == NUM_FLT)
           fatal("Cannot use a float literal in a range\n");
         upper= Thistoken.litval.intval;
-        scan(&Thistoken);
+        scan(Thistoken);
 
         // Ensure we are only applying
         // a range to an integer type
@@ -241,7 +241,7 @@ void enum_declaration(void) {
   char *name;
 
   // Skip the ENUM keyword and get the left brace
-  scan(&Thistoken);
+  scan(Thistoken);
   lbrace();
 
   // Loop getting the next enum item
@@ -255,7 +255,7 @@ void enum_declaration(void) {
     // If it's followed by an '='
     if (Thistoken.token == T_ASSIGN) {
       // Skip it and get the following numeric literal token
-      scan(&Thistoken);
+      scan(Thistoken);
       match(T_NUMLIT, false);
 
       // Check that the literal value isn't a float
@@ -266,11 +266,11 @@ void enum_declaration(void) {
       val.intval = Thistoken.litval.intval;
 
       // Skip the literal value
-      scan(&Thistoken);
+      scan(Thistoken);
     }
 
     // Get a suitable type for the literal value
-    ty = parse_litval(&val);
+    ty = parse_litval(val);
 
     // Add the enum's name and value to the global scope.
     // Then set the symbol's literal value
@@ -441,7 +441,7 @@ void struct_declaration(char *name) {
   int offset = 0;
 
   // Skip the STRUCT keyword and get the left brace
-  scan(&Thistoken);
+  scan(Thistoken);
   lbrace();
 
   // Build a new STRUCT type
@@ -469,7 +469,7 @@ void struct_declaration(char *name) {
       break;
 
     // Skip the comma
-    scan(&Thistoken);
+    scan(Thistoken);
   }
 
   // Set the struct size in bytes
@@ -489,7 +489,7 @@ ASTnode *union_declaration(void) {
   ASTnode *astmemb;
 
   // Skip the UNION keyword and get the left brace
-  scan(&Thistoken);
+  scan(Thistoken);
   lbrace();
 
   astmemb = typed_declaration_list();
@@ -509,10 +509,10 @@ int get_visibility(void) {
   switch (Thistoken.token) {
   case T_PUBLIC:
     visibility = SV_PUBLIC;
-    scan(&Thistoken);
+    scan(Thistoken);
   case T_EXTERN:
     visibility = SV_EXTERN;
-    scan(&Thistoken);
+    scan(Thistoken);
   }
   return (visibility);
 }
@@ -677,7 +677,7 @@ void global_var_declaration(ASTnode * decl, int visibility) {
 ASTnode *decl_initialisation(void) {
 
   // Skip the '='
-  scan(&Thistoken);
+  scan(Thistoken);
 
   // Get either an expression or a bracketed_expression_list
   if (Thistoken.token == T_LBRACE)
@@ -703,7 +703,7 @@ void function_declaration(ASTnode * func, int visibility) {
     add_function(func, func.left, visibility);
 
     // Skip the semicolon and return
-    scan(&Thistoken);
+    scan(Thistoken);
     return;
   }
 
@@ -738,11 +738,11 @@ ASTnode *function_prototype(ASTnode * func) {
   // If the next token is VOID,
   // see if it is followed by a ')'
   if (Thistoken.token == T_VOID) {
-    scan(&Peektoken);
+    scan(Peektoken);
     // It is, so we have no parameters
     if (Peektoken.token == T_RPAREN) {
       Peektoken.token= 0;
-      scan(&Thistoken);
+      scan(Thistoken);
       func.left= NULL;
       is_void= true;
     }
@@ -755,7 +755,7 @@ ASTnode *function_prototype(ASTnode * func) {
     // If the next token is an ELLIPSIS,
     // mark the function as variadic
     if (Thistoken.token == T_ELLIPSIS) {
-      scan(&Thistoken);
+      scan(Thistoken);
       func.is_variadic = true;
     }
 
@@ -766,7 +766,7 @@ ASTnode *function_prototype(ASTnode * func) {
 
   // If we have a THROWS
   if (Thistoken.token == T_THROWS) {
-    scan(&Thistoken);
+    scan(Thistoken);
 
     // Get the name and base type of the exception variable
     astexcept = typed_declaration();
@@ -782,7 +782,7 @@ ASTnode *function_prototype(ASTnode * func) {
 
     // Build a Sym node with the variable's name
     // and type, and add it to the ASTnode
-    add_sym_to(&(func.sym), astexcept.strlit, ST_VARIABLE, astexcept.ty);
+    add_sym_to(func.sym, astexcept.strlit, ST_VARIABLE, astexcept.ty);
     func.sym.visibility = SV_LOCAL;
   }
 
@@ -809,7 +809,7 @@ ASTnode *typed_declaration_list(void) {
       break;
 
     // Skip the comma
-    scan(&Thistoken);
+    scan(Thistoken);
 
     // Stop if we hit an ELLIPSIS
     if (Thistoken.token == T_ELLIPSIS)
@@ -843,7 +843,7 @@ ASTnode *array_typed_declaration(void) {
   if (Thistoken.token == T_LBRACKET) {
 
     // Skip the left bracket
-    scan(&Thistoken);
+    scan(Thistoken);
 
     // If we have a type in the '[' ']'
     if (match_type(true) != NULL) {
@@ -886,7 +886,7 @@ int64 array_size(void) {
 
   // Get the size, skip the NUMLIT
   size = Thistoken.litval.intval;
-  scan(&Thistoken);
+  scan(Thistoken);
 
   // Skip the ']'
   match(T_RBRACKET, true);
@@ -921,13 +921,13 @@ ASTnode *typed_declaration(void) {
 
   // See if the declaration is marked const
   if (Thistoken.token == T_CONST) {
-    scan(&Thistoken);
+    scan(Thistoken);
     is_const= true;
   }
 
   // See if the declaration is marked inout
   if (Thistoken.token == T_INOUT) {
-    scan(&Thistoken);
+    scan(Thistoken);
     is_inout= true;
   }
 
@@ -1004,12 +1004,12 @@ Type *match_type(bool checkonly) {
     fatal("Unknown type %s\n", Text);
 
   // Get the next token
-  scan(&Thistoken);
+  scan(Thistoken);
 
   // Loop counting the number of STAR tokens
   // and getting a a pointer to the previous type
   while (Thistoken.token == T_STAR) {
-    scan(&Thistoken);
+    scan(Thistoken);
     t = pointer_to(t);
   }
 
@@ -1189,7 +1189,7 @@ ASTnode *procedural_stmt(void) {
     return (undef_stmt());
   case T_IDENT:
     // Get the next token.
-    scan(&Peektoken);
+    scan(Peektoken);
 
     // If it's a '(' then it's a function call.
     if (Peektoken.token == T_LPAREN) {
@@ -1244,7 +1244,7 @@ ASTnode *short_assign_stmt(void) {
     e = Calloc(sizeof(ASTnode));
     memcpy(e, v, sizeof(ASTnode));
     e.rvalue = true;
-    scan(&Thistoken);
+    scan(Thistoken);
 
     // Build a NUMLIT node with 1 in it
     // and add it from the rval variable
@@ -1260,7 +1260,7 @@ ASTnode *short_assign_stmt(void) {
     e = Calloc(sizeof(ASTnode));
     memcpy(e, v, sizeof(ASTnode));
     e.rvalue = true;
-    scan(&Thistoken);
+    scan(Thistoken);
 
     // Build a NUMLIT node with 1 in it,
     // and subtract it from the rval variable
@@ -1279,11 +1279,11 @@ ASTnode *short_assign_stmt(void) {
 
     // Peek ahead because we might be followed by a
     // string literal or a semicolon
-    scan(&Peektoken);
+    scan(Peektoken);
 
     // It's an "= const ;" statement
     if (Peektoken.token == T_SEMI) {
-      scan(&Thistoken);
+      scan(Thistoken);
  
       // We can't do if it not an A_IDENT
       if (v.op != A_IDENT)
@@ -1314,7 +1314,7 @@ ASTnode *if_stmt(void) {
   // Get the expression, right parenthesis
   // and the statement block. Make sure the
   // expression has boolean type
-  scan(&Thistoken);
+  scan(Thistoken);
   lparen();
   e = expression();
   if (e.ty != ty_bool)
@@ -1325,7 +1325,7 @@ ASTnode *if_stmt(void) {
   // If we now have an ELSE
   // get the following statement block
   if (Thistoken.token == T_ELSE) {
-    scan(&Thistoken);
+    scan(Thistoken);
     f = statement_block(NULL);
   }
 
@@ -1340,13 +1340,13 @@ ASTnode *while_stmt(void) {
   ASTnode *s;
 
   // Skip the WHILE, check for a left parenthesis.
-  scan(&Thistoken);
+  scan(Thistoken);
   lparen();
 
   // If we have a TRUE token, build an ASTnode for it
   if (Thistoken.token == T_TRUE) {
     e = mkastleaf(A_NUMLIT, ty_bool, true, NULL, 1);
-    scan(&Thistoken);
+    scan(Thistoken);
   } else {
     // Otherwise, get the expression. Ensure it is boolean
     e = expression();
@@ -1374,7 +1374,7 @@ ASTnode *for_stmt(void) {
   ASTnode *s;
 
   // Skip the FOR, check for a left parenthesis.
-  scan(&Thistoken);
+  scan(Thistoken);
   lparen();
 
   // If we don't have a semicolon, get the initial statement(s).
@@ -1382,7 +1382,7 @@ ASTnode *for_stmt(void) {
   if (Thistoken.token != T_SEMI) {
     // If we have a left brace, it's a set of procedural statements
     if (Thistoken.token == T_LBRACE) {
-      scan(&Thistoken);
+      scan(Thistoken);
       i= procedural_stmts();
       rbrace();
     } else
@@ -1406,7 +1406,7 @@ ASTnode *for_stmt(void) {
   if (Thistoken.token != T_RPAREN) {
     // If we have a left brace, it's a set of procedural statements
     if (Thistoken.token == T_LBRACE) {
-      scan(&Thistoken);
+      scan(Thistoken);
       send= procedural_stmts();
       rbrace();
     } else
@@ -1472,7 +1472,7 @@ ASTnode *foreach_stmt(void) {
   ASTnode *spre=NULL;		// Assigns array element to the var
 
   // Skip the 'foreach' keyword
-  scan(&Thistoken);
+  scan(Thistoken);
 
   // Get the variable and the lparen
   var= postfix_variable(NULL);
@@ -1492,7 +1492,7 @@ ASTnode *foreach_stmt(void) {
   switch(Thistoken.token) {
     case T_ELLIPSIS:
       // Skip the ellipsis and get the final expression
-      scan(&Thistoken);
+      scan(Thistoken);
       finalval= expression();
 
       // Build an assignment statement for the initial value
@@ -1507,7 +1507,7 @@ ASTnode *foreach_stmt(void) {
       send = assignment_statement(var, send);
 
     case T_COMMA:
-      scan(&Thistoken);
+      scan(Thistoken);
       nextval= postfix_variable(NULL);
       // Check that the initval is a variable
       if (is_postfixvar(initval)==false)
@@ -1653,7 +1653,7 @@ ASTnode *return_stmt(void) {
   ASTnode *e = NULL;
 
   // Skip the 'return' token
-  scan(&Thistoken);
+  scan(Thistoken);
 
   // If we have a left parenthesis, we are returning a value
   if (Thistoken.token == T_LPAREN) {
@@ -1692,7 +1692,7 @@ ASTnode *abort_stmt(void) {
   ASTnode *this;
 
   // Skip the 'abort' token
-  scan(&Thistoken);
+  scan(Thistoken);
 
   // Build the A_ABORT node
   this = mkastnode(A_ABORT, NULL, NULL, NULL);
@@ -1708,7 +1708,7 @@ ASTnode *break_stmt(void) {
   ASTnode *this;
 
   // Skip the 'break' token
-  scan(&Thistoken);
+  scan(Thistoken);
 
   // Build the A_BREAK node
   this = mkastnode(A_BREAK, NULL, NULL, NULL);
@@ -1724,7 +1724,7 @@ ASTnode *continue_stmt(void) {
   ASTnode *this;
 
   // Skip the 'continue' token
-  scan(&Thistoken);
+  scan(Thistoken);
 
   // Build the A_CONTINUE node
   this = mkastnode(A_CONTINUE, NULL, NULL, NULL);
@@ -1742,7 +1742,7 @@ ASTnode *try_stmt(void) {
   ASTnode *n;
 
   // Skip the 'try' and get the left parenthesis
-  scan(&Thistoken);
+  scan(Thistoken);
   lparen();
 
   // Ensure we have an identifier and get its symbol
@@ -1764,7 +1764,7 @@ ASTnode *try_stmt(void) {
   n = mkident(n);
 
   // Skip the identifier and right parenthesis
-  scan(&Thistoken);
+  scan(Thistoken);
   rparen();
 
   // Get the try statement block
@@ -1805,7 +1805,7 @@ ASTnode *switch_stmt(void) {
   int64 caseval = 0;
 
   // Skip the 'switch' and '('
-  scan(&Thistoken);
+  scan(Thistoken);
   lparen();
 
   // Get the switch expression, the ')' and the '{'
@@ -1837,12 +1837,12 @@ ASTnode *switch_stmt(void) {
 
       if (Thistoken.token == T_DEFAULT) {
 	ASTop = A_DEFAULT;
-	scan(&Thistoken);
+	scan(Thistoken);
 	seendefault = true;
       } else {
 	// Scan the case value if required
 	ASTop = A_CASE;
-	scan(&Thistoken);
+	scan(Thistoken);
 
 	// Get the case expression
 	left = expression();
@@ -1909,7 +1909,7 @@ ASTnode *switch_stmt(void) {
 ASTnode *fallthru_stmt(void) {
 
   // Skip the 'fallthru'
-  scan(&Thistoken);
+  scan(Thistoken);
   semi();
   return (mkastnode(A_FALLTHRU, NULL, NULL, NULL));
 }
@@ -1932,7 +1932,7 @@ ASTnode *function_call(void) {
     fatal("Unknown function %s()\n", s.strlit);
 
   // Skip the identifier
-  scan(&Thistoken);
+  scan(Thistoken);
 
   // NOTE: At this point we diverge from the grammar given above
   // because we could just be assigning a function to a function
@@ -1950,7 +1950,7 @@ ASTnode *function_call(void) {
   if (Thistoken.token != T_RPAREN) {
     // See if the lookahead token is an '='.
     // If so, we have a named expression list
-    scan(&Peektoken);
+    scan(Peektoken);
     if (Peektoken.token == T_ASSIGN) {
       e = named_expression_list();
     } else {
@@ -1980,7 +1980,7 @@ ASTnode *va_start_end_stmt(void) {
   Sym *sym;
 
   // Skip the keyword and '('
-  scan(&Thistoken);
+  scan(Thistoken);
   lparen();
 
   // Ensure that we have an identifier
@@ -1996,7 +1996,7 @@ ASTnode *va_start_end_stmt(void) {
     fatal("va_start(variable) and va_end(variable) must be void * type\n");
 
   // Skip the identifier ')' and ';'
-  scan(&Thistoken);
+  scan(Thistoken);
   rparen();
   semi();
   astop= (token== T_VASTART) ? A_VASTART : A_VAEND;
@@ -2011,7 +2011,7 @@ ASTnode *undef_stmt(void) {
   ASTnode *ary;
 
   // Skip the keyword and '('
-  scan(&Thistoken);
+  scan(Thistoken);
   lparen();
 
   // Get the associative array.
@@ -2036,7 +2036,7 @@ ASTnode *bracketed_expression_list(void) {
   ASTnode *this;
 
   // Skip the left brace
-  scan(&Thistoken);
+  scan(Thistoken);
 
   // Make the BEL node which will hold the list
   bel = mkastnode(A_BEL, NULL, NULL, NULL);
@@ -2052,13 +2052,13 @@ ASTnode *bracketed_expression_list(void) {
       break;
 
     // Get the next element and append it
-    scan(&Thistoken);
+    scan(Thistoken);
     this.mid = bracketed_expression_element();
     this = this.mid;
   }
 
   // Skip the right brace and return the list
-  scan(&Thistoken);
+  scan(Thistoken);
   return (bel);
 }
 
@@ -2092,7 +2092,7 @@ ASTnode *expression_list(void) {
   // If we have a comma, skip it.
   // Get the following expression list
   if (Thistoken.token == T_COMMA) {
-    scan(&Thistoken);
+    scan(Thistoken);
     l = expression_list();
   }
 
@@ -2120,7 +2120,7 @@ ASTnode *named_expression_list(void) {
   this = mkastleaf(A_ASSIGN, NULL, false, NULL, 0);
   first = this;
   first.strlit = Thistoken.tokstr;
-  scan(&Thistoken);
+  scan(Thistoken);
 
   // Check for the '=' token
   match(T_ASSIGN, true);
@@ -2136,7 +2136,7 @@ ASTnode *named_expression_list(void) {
 
     // Skip the comma
     // Get the next named expression and link it in
-    scan(&Thistoken);
+    scan(Thistoken);
     next = named_expression_list();
     this.right = next;
     this = next;
@@ -2177,7 +2177,7 @@ ASTnode *ternary_expression(void) {
     // the expression's type is boolean
     if ((Thistoken.token == T_QUESTION) && (n.ty == ty_bool)) {
       // Skip the '?'
-      scan(&Thistoken);
+      scan(Thistoken);
       e= n;
 
       // Get the true expression
@@ -2217,7 +2217,7 @@ ASTnode *bitwise_expression(void) {
 
   // Deal with a leading '~'
   if (Thistoken.token == T_INVERT) {
-    scan(&Thistoken);
+    scan(Thistoken);
     invert = true;
   }
 
@@ -2233,19 +2233,19 @@ ASTnode *bitwise_expression(void) {
   while (loop) {
     switch (Thistoken.token) {
     case T_AMPER:
-      scan(&Thistoken);
+      scan(Thistoken);
       right = boolean_expression();
       cant_do(left, ty_bool, "Cannot do bitwise operations on a boolean\n");
       cant_do(right, ty_bool, "Cannot do bitwise operations on a boolean\n");
       left = binop(left, right, A_AND);
     case T_OR:
-      scan(&Thistoken);
+      scan(Thistoken);
       right = boolean_expression();
       cant_do(left, ty_bool, "Cannot do bitwise operations on a boolean\n");
       cant_do(right, ty_bool, "Cannot do bitwise operations on a boolean\n");
       left = binop(left, right, A_OR);
     case T_XOR:
-      scan(&Thistoken);
+      scan(Thistoken);
       right = boolean_expression();
       cant_do(left, ty_bool, "Cannot do bitwise operations on a boolean\n");
       cant_do(right, ty_bool, "Cannot do bitwise operations on a boolean\n");
@@ -2280,7 +2280,7 @@ ASTnode *logical_and_expression(void) {
   while (true) {
     if (Thistoken.token != T_LOGAND)
       break;
-    scan(&Thistoken);
+    scan(Thistoken);
     right = relational_expression();
     if ((left.ty != ty_bool) || (right.ty != ty_bool))
       fatal("Can only do logical AND on boolean types\n");
@@ -2305,7 +2305,7 @@ ASTnode *logical_or_expression(void) {
   while (true) {
     if (Thistoken.token != T_LOGOR)
       break;
-    scan(&Thistoken);
+    scan(Thistoken);
     right = relational_expression();
     if ((left.ty != ty_bool) || (right.ty != ty_bool))
       fatal("Can only do logical OR on boolean types\n");
@@ -2334,7 +2334,7 @@ ASTnode *relational_expression(void) {
 
   // Deal with a leading '!'
   if (Thistoken.token == T_LOGNOT) {
-    scan(&Thistoken);
+    scan(Thistoken);
     not = true;
   }
 
@@ -2350,27 +2350,27 @@ ASTnode *relational_expression(void) {
   // See if we have a shift operation
   switch (Thistoken.token) {
   case T_GE:
-    scan(&Thistoken);
+    scan(Thistoken);
     right = shift_expression();
     left = binop(left, right, A_GE);
   case T_GT:
-    scan(&Thistoken);
+    scan(Thistoken);
     right = shift_expression();
     left = binop(left, right, A_GT);
   case T_LE:
-    scan(&Thistoken);
+    scan(Thistoken);
     right = shift_expression();
     left = binop(left, right, A_LE);
   case T_LT:
-    scan(&Thistoken);
+    scan(Thistoken);
     right = shift_expression();
     left = binop(left, right, A_LT);
   case T_EQ:
-    scan(&Thistoken);
+    scan(Thistoken);
     right = shift_expression();
     left = binop(left, right, A_EQ);
   case T_NE:
-    scan(&Thistoken);
+    scan(Thistoken);
     right = shift_expression();
     left = binop(left, right, A_NE);
   }
@@ -2395,13 +2395,13 @@ ASTnode *shift_expression(void) {
   while (loop) {
     switch (Thistoken.token) {
     case T_LSHIFT:
-      scan(&Thistoken);
+      scan(Thistoken);
       right = additive_expression();
       cant_do(left, ty_bool, "Cannot do shift operations on a boolean\n");
       cant_do(right, ty_bool, "Cannot do shift operations on a boolean\n");
       left = binop(left, right, A_LSHIFT);
     case T_RSHIFT:
-      scan(&Thistoken);
+      scan(Thistoken);
       right = additive_expression();
       cant_do(left, ty_bool, "Cannot do shift operations on a boolean\n");
       cant_do(right, ty_bool, "Cannot do shift operations on a boolean\n");
@@ -2433,9 +2433,9 @@ ASTnode *additive_expression(void) {
   // Deal with a leading '+' or '-'
   switch (Thistoken.token) {
   case T_PLUS:
-    scan(&Thistoken);
+    scan(Thistoken);
   case T_MINUS:
-    scan(&Thistoken);
+    scan(Thistoken);
     negate = true;
   }
 
@@ -2451,13 +2451,13 @@ ASTnode *additive_expression(void) {
   while (loop) {
     switch (Thistoken.token) {
     case T_PLUS:
-      scan(&Thistoken);
+      scan(Thistoken);
       right = multiplicative_expression();
       cant_do(left, ty_bool, "Cannot do additive operations on a boolean\n");
       cant_do(right, ty_bool, "Cannot do additive operations on a boolean\n");
       left = binop(left, right, A_ADD);
     case T_MINUS:
-      scan(&Thistoken);
+      scan(Thistoken);
       right = multiplicative_expression();
       cant_do(left, ty_bool, "Cannot do additive operations on a boolean\n");
       cant_do(right, ty_bool, "Cannot do additive operations on a boolean\n");
@@ -2504,7 +2504,7 @@ ASTnode *multiplicative_expression(void) {
   while (loop) {
     switch (Thistoken.token) {
     case T_STAR:
-      scan(&Thistoken);
+      scan(Thistoken);
       right = unary_expression();
       cant_do(left, ty_bool,
 	      "Cannot do multiplicative operations on a boolean\n");
@@ -2512,7 +2512,7 @@ ASTnode *multiplicative_expression(void) {
 	      "Cannot do multiplicative operations on a boolean\n");
       left = binop(left, right, A_MULTIPLY);
     case T_SLASH:
-      scan(&Thistoken);
+      scan(Thistoken);
       right = unary_expression();
       cant_do(left, ty_bool,
 	      "Cannot do multiplicative operations on a boolean\n");
@@ -2520,7 +2520,7 @@ ASTnode *multiplicative_expression(void) {
 	      "Cannot do multiplicative operations on a boolean\n");
       left = binop(left, right, A_DIVIDE);
     case T_MOD:
-      scan(&Thistoken);
+      scan(Thistoken);
       right = unary_expression();
       cant_do(left, ty_bool,
 	      "Cannot do multiplicative operations on a boolean\n");
@@ -2548,7 +2548,7 @@ ASTnode *unary_expression(void) {
   switch (Thistoken.token) {
   case T_AMPER:
     // Get the next token and parse it
-    scan(&Thistoken);
+    scan(Thistoken);
     u = primary_expression();
 
     // Get an address based on the AST operation
@@ -2577,7 +2577,7 @@ ASTnode *unary_expression(void) {
     // Get the next token and parse it
     // recursively as a unary expression.
     // Make it an rvalue
-    scan(&Thistoken);
+    scan(Thistoken);
     u = unary_expression();
     u.rvalue = true;
 
@@ -2623,19 +2623,19 @@ ASTnode *primary_expression(void) {
   case T_LPAREN:
     // Skip the left parentheses, get the expression,
     // skip the right parentheses and return
-    scan(&Thistoken);
+    scan(Thistoken);
     f = expression();
     rparen();
     return (f);
   case T_NUMLIT:
     // Build an ASTnode with the numeric value and suitable type
-    ty = parse_litval(&Thistoken.litval);
+    ty = parse_litval(Thistoken.litval);
     f = mkastleaf(A_NUMLIT, ty, true, NULL, Thistoken.litval.intval);
-    scan(&Thistoken);
+    scan(Thistoken);
   case T_CONST:
     // It must be a const string literal. Skip the const token.
     // Set the is_const flag. Check we have a following STRLIT
-    scan(&Thistoken);
+    scan(Thistoken);
     is_const= true;
     match(T_STRLIT, false);
     fallthru;
@@ -2643,16 +2643,16 @@ ASTnode *primary_expression(void) {
     // Build an ASTnode with the string literal and ty_int8ptr type
     f = mkastleaf(A_STRLIT, ty_int8ptr, false, NULL, 0);
     f.strlit = Thistoken.tokstr;
-    scan(&Thistoken);
+    scan(Thistoken);
   case T_TRUE:
     f = mkastleaf(A_NUMLIT, ty_bool, true, NULL, 1);
-    scan(&Thistoken);
+    scan(Thistoken);
   case T_FALSE:
     f = mkastleaf(A_NUMLIT, ty_bool, true, NULL, 0);
-    scan(&Thistoken);
+    scan(Thistoken);
   case T_NULL:
     f = mkastleaf(A_NUMLIT, ty_voidptr, true, NULL, 0);
-    scan(&Thistoken);
+    scan(Thistoken);
   case T_SIZEOF:
     f = sizeof_expression();
   case T_VAARG:
@@ -2674,7 +2674,7 @@ ASTnode *primary_expression(void) {
       f.is_const= sym.is_const;
     case ST_ENUM:
       f = mkastleaf(A_NUMLIT, sym.ty, true, NULL, sym.count);
-      scan(&Thistoken);
+      scan(Thistoken);
     default:
       fatal("Unknown symbol type for %s\n", Thistoken.tokstr);
     }
@@ -2695,7 +2695,7 @@ ASTnode *sizeof_expression(void) {
   Sym *sym;
 
   // Skip the keyword, get the '('
-  scan(&Thistoken);
+  scan(Thistoken);
   lparen();
 
   if (Thistoken.token == T_IDENT) {
@@ -2709,14 +2709,14 @@ ASTnode *sizeof_expression(void) {
       // If this is an array, return the number of elements
       if (is_array(sym)) {
 	e = mkastleaf(A_NUMLIT, ty_uint64, true, NULL, sym.count);
-	scan(&Thistoken);
+	scan(Thistoken);
 	rparen();
 	return (e);
       }
 
       // Otherwise set up ty to be the symbol's type
       ty = sym.ty;
-      scan(&Thistoken);
+      scan(Thistoken);
     }
   }
 
@@ -2747,7 +2747,7 @@ ASTnode *va_arg_expression(void) {
   Type *ty;
 
   // Skip the keyword, get the '('
-  scan(&Thistoken);
+  scan(Thistoken);
   lparen();
 
   // Ensure that we have an identifier
@@ -2763,7 +2763,7 @@ ASTnode *va_arg_expression(void) {
     fatal("va_arg(variable,...) variable must be void * type\n");
 
   // Skip the identifier ')' and ','
-  scan(&Thistoken);
+  scan(Thistoken);
   match(T_COMMA, true);
 
   // Get the type in the parentheses
@@ -2796,7 +2796,7 @@ ASTnode *cast_expression(void) {
   Type *ty;
 
   // Skip the keyword, get the '('
-  scan(&Thistoken);
+  scan(Thistoken);
   lparen();
 
   // Get the expression in the parentheses
@@ -2827,7 +2827,7 @@ ASTnode *exists_expression(void) {
   ASTnode *e;
 
   // Skip the keyword, get the '('
-  scan(&Thistoken);
+  scan(Thistoken);
   lparen();
 
   // Get the postfix variable in the parentheses.
@@ -2870,7 +2870,7 @@ ASTnode *postfix_variable(ASTnode * n) {
     n = mkastleaf(A_IDENT, NULL, false, NULL, 0);
     n.strlit = Thistoken.tokstr;
     n = mkident(n);		// Check variable exists, get its type
-    scan(&Thistoken);
+    scan(Thistoken);
 
     // If the variable is marked inout
     if (n.sym.is_inout) {
@@ -2890,7 +2890,7 @@ ASTnode *postfix_variable(ASTnode * n) {
 
   case T_LBRACKET:
     // An array access. Skip the token
-    scan(&Thistoken);
+    scan(Thistoken);
 
     // Get the expression.
     e = expression();
@@ -2919,7 +2919,7 @@ ASTnode *postfix_variable(ASTnode * n) {
 
   case T_DOT:
     // A member access. Skip the '.'
-    scan(&Thistoken);
+    scan(Thistoken);
 
     // Check that n has struct type with any pointer depth (for now)
     ty = n.ty;
@@ -2954,7 +2954,7 @@ ASTnode *postfix_variable(ASTnode * n) {
       fatal("No member named %s in struct %s\n", Thistoken.tokstr, n.strlit);
 
     // Skip the identifier
-    scan(&Thistoken);
+    scan(Thistoken);
 
     // Make a NUMLIT node with the member's offset
     off = mkastleaf(A_NUMLIT, ty_uint64, true, NULL, memb.offset);

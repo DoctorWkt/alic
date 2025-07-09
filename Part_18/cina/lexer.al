@@ -19,12 +19,12 @@ int next(void) {
 
   while (Linestart && c == '#') {	// We've hit a pre-processor statement
     Linestart = false;			// No longer at the start of the line
-    scan(&Thistoken);			// Get the line number into l
+    scan(Thistoken);			// Get the line number into l
     if (Thistoken.token != T_NUMLIT)
       fatal("Expecting pre-processor line number, got %s\n", Text);
     l = cast(Thistoken.litval.intval, int);
 
-    scan(&Thistoken);			// Get the filename in Text
+    scan(Thistoken);			// Get the filename in Text
     if (Thistoken.token != T_STRLIT)
       fatal("Expecting pre-processor file name, got %s\n", Text);
 
@@ -375,7 +375,7 @@ int keyword(char *s) {
 
 // Scan and return the next token found in the input.
 // Return true if token valid, false if no tokens left.
-public bool scan(Token * t) {
+public bool scan(inout Token t) {
   int c;
   int tokentype;
 
@@ -596,7 +596,7 @@ void dumptokens(void) {
   Token t;
 
   while (true) {
-    if (scan(&t) == 0)
+    if (scan(t) == 0)
       return;
     fprintf(Debugfh, "%s", tokstr[t.token]);
     switch (t.token) {
@@ -622,7 +622,7 @@ public void match(const int t, const bool getnext) {
     fatal("Expected %s, got %s\n", tokstr[t], tokstr[Thistoken.token]);
 
   if (getnext)
-    scan(&Thistoken);
+    scan(Thistoken);
 }
 
 // Match a semicolon and fetch the next token

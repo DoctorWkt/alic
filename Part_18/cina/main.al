@@ -93,7 +93,7 @@ char *do_compile(const char *filename) {
   Putback = 0;
 
   Peektoken.token = 0;          // Set there is no lookahead token
-  scan(&Thistoken);             // Get the first token from the input
+  scan(Thistoken);		// Get the first token from the input
 
   // Dump the tokens and re-open the input file
   if (O_dumptokens) {
@@ -104,7 +104,7 @@ char *do_compile(const char *filename) {
     Linestart = true;
     Putback = 0;
     Peektoken.token = 0;
-    scan(&Thistoken);
+    scan(Thistoken);
   }
 
   if (O_verbose)

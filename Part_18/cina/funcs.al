@@ -83,7 +83,7 @@ public bool add_function(const ASTnode * func,
   // The function is a new one. Walk the parmlist adding
   // each name and type to the function's member list
   for (; paramlist != NULL; paramlist = paramlist.mid) {
-    this = add_sym_to(&(funcptr.paramlist), paramlist.strlit,
+    this = add_sym_to(funcptr.paramlist, paramlist.strlit,
 		      ST_VARIABLE, paramlist.ty);
     if (this == NULL)
       fatal("Multiple parameters named %s in %s()\n",

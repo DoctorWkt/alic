@@ -17,14 +17,14 @@ public void init_symtable(void) {
 // a new symbol node to the list. If the symbol's name
 // is already in the list, return NULL. Otherwise
 // return a pointer to the new symbol.
-public Sym *add_sym_to(Sym ** head, char *name, int symtype, Type * ty) {
+public Sym *add_sym_to(inout Sym * head, char *name, int symtype, Type * ty) {
   Sym *this;
   Sym *last;
 
   // Walk the list to see if the symbol is already there.
   // Also point last at the last node in the list
-  last = *head;
-  foreach this (*head, this.next) {
+  last = head;
+  foreach this (head, this.next) {
     if (strcmp(this.name, name)==0)
       return (NULL);
     last = this;
@@ -42,8 +42,8 @@ public Sym *add_sym_to(Sym ** head, char *name, int symtype, Type * ty) {
   this.ty = ty;
 
   // The list is empty: make this the first node
-  if (*head == NULL) {
-    *head = this;
+  if (head == NULL) {
+    head = this;
     return (this);
   }
   // Otherwise append the new node to the list
@@ -57,13 +57,13 @@ public Sym *add_symbol(char *name, int symtype, Type * ty, int visibility) {
   Sym *this;
 
   if (visibility != SV_LOCAL) {
-    this = add_sym_to(&(Globhead.head), name, symtype, ty);
+    this = add_sym_to(Globhead.head, name, symtype, ty);
     if (this != NULL) {
       this.has_addr = true;
       this.visibility = visibility;
     }
   } else {
-    this = add_sym_to(&(Scopehead.head), name, symtype, ty);
+    this = add_sym_to(Scopehead.head, name, symtype, ty);
     if (this != NULL)
       this.visibility = visibility;
   }
