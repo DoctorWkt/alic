@@ -54,12 +54,20 @@ bool add_function(ASTnode * func, ASTnode * paramlist, int visibility) {
 	fatal("%s() declaration: param name mismatch %s vs %s\n",
 	      func->strlit, this->name, paramlist->strlit);
 
-      // Parameter types differ
-      if (this->type != paramlist->type)
-	fatal("%s() declaration: param type mismatch %s vs %s\n",
+      // Parameter types differ. Do a different
+      // check when the parameter is marked inout
+      if (this->is_inout) {
+	if (value_at(this->type) != paramlist->type)
+	  fatal("%s() declaration: param type mismatch %s vs %s\n",
+	      func->strlit, get_typename(value_at(this->type)),
+	      get_typename(paramlist->type));
+      } else {
+        if (this->type != paramlist->type)
+	  fatal("%s() declaration: param type mismatch %s vs %s\n",
 	      func->strlit, get_typename(this->type),
 	      get_typename(paramlist->type));
-
+      }
+	
       // Move up to the next parameter in both lists
       this = this->next;
       paramlist = paramlist->mid;
