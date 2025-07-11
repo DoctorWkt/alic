@@ -4,6 +4,8 @@ As I thought, adding string expressions and string literals to `switch()` and `c
 
 The more interesting changes were the remaining three.
 
+> **Note**: I discarded this version of function pointers and rewrote it all in [part 18](../Part_18/). So I would suggestion that you skip forward to the "Iterator Functions" section. I'll leave the discussion of the old code here for posterity.
+
 ## Function Pointers: Syntax
 
 I've used function pointers in several languages, and I really dislike the way that they are declared in C. So here is my choice for function pointer declarations: they look like a function prototype but with a '*' character after the function pointer's name, e.g.
