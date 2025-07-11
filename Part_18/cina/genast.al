@@ -389,12 +389,60 @@ void gen_local(ASTnode * n) {
   genAST(n.right);
 }
 
+// Given a parameter's type and inout flag,
+// and an ASTnode which is the argument,
+// return the node to match the parameter's type
+ASTnode *fixup_argument(Type* paramtype, bool is_inout, ASTnode * node) {
+  // If we still have a parameter with a type
+  if (paramtype != NULL) {
+
+    // If this is an inout parameter
+    if (is_inout) {
+      // Ensure the parameter's type is a pointer
+      // to the node's type
+      if (paramtype != pointer_to(node.ty))
+	fatal("inout argument not of type %s\n",
+	      get_typename(value_at(paramtype)));
+
+      // Get the node's addess or, if not, an error.
+      // This code echoes unary_expression()
+      switch (node.op) {
+      case A_DEREF:
+	node = node.left;	// Remove an A_DEREF
+      case A_IDENT:		// Change to ADDR
+	node.op = A_ADDR;
+      case A_ADDOFFSET:
+	node.op = node.op;	// I had to do a no-op
+      default:
+	fatal("inout argument has no address\n");
+      }
+      node.ty = paramtype;
+    } else {
+      // Widen the expression to match the parameter type
+      node = widen_expression(node, paramtype);
+    }
+  } else {
+    // No parameter, so this is a variadic argument.
+    // On x64, widen ints to at least int32 and flt32s to flt64
+    if (is_integer(node.ty) && (node.ty.kind < TY_INT32)) {
+      if (node.ty.is_unsigned == true)
+	node = widen_type(node, ty_uint32, 0);
+      else
+	node = widen_type(node, ty_int32, 0);
+    }
+    if (is_flonum(node.ty) && (node.ty.kind == TY_FLT32))
+      node = widen_type(node, ty_flt64, 0);
+  }
+  return (node);
+}
+
 // Generate the argument values for a function
 // call and then perform the call itself.
 // Return any value into a temporary.
 //
 int gen_funccall(ASTnode * n) {
   Sym *func;
+  Paramtype *ptype;
   Sym *param;
   ASTnode *this;
   ASTnode *node;
@@ -410,7 +458,7 @@ int gen_funccall(ASTnode * n) {
 
   // Get the matching symbol for the function's name
   func = n.sym;
-  if (func.symtype != ST_FUNCTION)
+  if (func.symtype != ST_FUNCTION && func.ty.kind != TY_FUNCPTR)
     lfatal(n.line, "%s is not a function\n", n.left.strlit);
 
   // Cache if the function throws an exception
@@ -426,6 +474,11 @@ int gen_funccall(ASTnode * n) {
     if (this.op == A_GLUE || this.op == A_ASSIGN)
       numargs++;
   }
+
+  // For function pointers, count the number of parameters
+  if (func.ty.kind == TY_FUNCPTR)
+    for (ptype= func.ty.paramtype; ptype != NULL; ptype= ptype.next)
+      func.count++;
 
   // Check the arg count vs. the function parameter count.
   // Allow more arguments if the function is variadic
@@ -443,8 +496,32 @@ int gen_funccall(ASTnode * n) {
     if (arglist == NULL || typelist == NULL)
       fatal("Out of memory in gen_funccall()\n");
 
-    // Do we have a named expression list?
-    if (n.right.op == A_ASSIGN) {
+    // Do we have a function pointer?
+    if (func.ty.kind == TY_FUNCPTR) {
+      // Walk the parameter type list
+      ptype= func.ty.paramtype;
+      for ({i = 0; this = n.right;}; this != NULL; {this = this.right; i++;}) {
+	if (this.op == A_GLUE)
+	  node = this.left;
+	else
+	  node = this;
+
+	// Make the node match the parameter
+	if (ptype==NULL)
+	  node= fixup_argument(NULL, false, node);
+	else
+	  node= fixup_argument(ptype.ty, ptype.is_inout, node);
+
+	// Put the type and the temporary into the list
+	typelist[i] = node.ty;
+	arglist[i] = genAST(node);
+
+	// Move up to the next parameter type
+	if (ptype != NULL)
+	  ptype = ptype.next;
+      }
+           // Do we have a named expression list?
+    } else if (n.right.op == A_ASSIGN) {
 
       // Can't do this with a variadic function
       if (func.is_variadic == true)
@@ -462,40 +539,16 @@ int gen_funccall(ASTnode * n) {
 	foreach this (n.right, this.right) {
 	  if (strcmp(param.name, this.strlit)==0) {
 
-	    // See if we have already used this parameter name
+	    // See if we have already used this parameter name.
+	    // Mark it as being used
 	    if (param.count == 1)
 	      lfatal(n.line, "Parameter %s used multiple times\n", param.name);
-
-	    // Check and, if needed, widen the expression's
-	    // type to match the parameter's type.
-	    // Generate the code for each expression.
-	    // Cache the temporary number and the type for each one.
 	    param.count = 1;
 
-            // If this is an inout parameter
-            if (param.is_inout) {
-              // Ensure the parameter's type is a pointer
-              // to the node's type
-              if (param.ty != pointer_to(node.ty))
-                fatal("inout argument not of type %s\n",
-                        get_typename(value_at(param.ty)));
+	    // Make the node match the parameter
+	    this.left= fixup_argument(param.ty, param.is_inout, this.left);
 
-              // Get the node's addess or, if not, an error.
-              // This code echoes unary_expression()
-              switch(node.op) {
-                case A_DEREF:
-                  node= node.left;	// Remove an A_DEREF
-                case A_IDENT:		// Change to ADDR
-                  node.op = A_ADDR;
-                case A_ADDOFFSET:
-                  node.op = node.op;	// I had to do a no-op
-                default:
-                  fatal("inout argument has no address\n");
-              }
-              node.ty= param.ty;
-            } else {
-	      this.left = widen_expression(this.left, param.ty);
-	    }
+	    // Put the type and the temporary into the list
 	    typelist[i] = this.left.ty;
 	    arglist[i] = genAST(this.left);
 	  }
@@ -518,46 +571,11 @@ int gen_funccall(ASTnode * n) {
 	else
 	  node = this;
 
-	// If we still have a parameter with a type
-	if (param != NULL) {
-
-          // If this is an inout parameter
-          if (param.is_inout) {
-            // Ensure the parameter's type is a pointer
-            // to the node's type
-            if (param.ty != pointer_to(node.ty))
-              fatal("inout argument not of type %s\n",
-                        get_typename(value_at(param.ty)));
-
-            // Get the node's addess or, if not, an error.
-            // This code echoes unary_expression()
-            switch(node.op) {
-              case A_DEREF:
-                node= node.left;	// Remove an A_DEREF
-              case A_IDENT:		// Change to ADDR
-                node.op = A_ADDR;
-              case A_ADDOFFSET:
-                node.op = node.op;	// I had to do a no-op
-              default:
-                fatal("inout argument has no address\n");
-            }
-            node.ty= param.ty;
-          } else {
-            // Widen the expression to match the parameter type
-            node = widen_expression(node, param.ty);
-          }
-	} else {
-	  // No parameter, so this is a variadic argument.
-	  // On x64, widen ints to at least int32 and flt32s to flt64
-	  if (is_integer(node.ty) && (node.ty.kind < TY_INT32)) {
-	    if (node.ty.is_unsigned == true)
-	      node = widen_type(node, ty_uint32, 0);
-	    else
-	      node = widen_type(node, ty_int32, 0);
-	  }
-	  if (is_flonum(node.ty) && (node.ty.kind == TY_FLT32))
-	    node = widen_type(node, ty_flt64, 0);
-	}
+	// Make the node match the parameter
+	if (param==NULL)
+	  node= fixup_argument(NULL, false, node);
+	else
+	  node= fixup_argument(param.ty, param.is_inout, node);
 
 	// Put the type and the temporary into the list
 	typelist[i] = node.ty;

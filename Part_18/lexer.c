@@ -311,6 +311,7 @@ static struct keynode keylist[] = {
   {'f', "flt64", T_FLT64},
   {'f', "for", T_FOR},
   {'f', "foreach", T_FOREACH},
+  {'f', "funcptr", T_FUNCPTR},
   {'i', "if", T_IF},
   {'i', "inout", T_INOUT},
   {'i', "int8", T_INT8},
@@ -591,6 +592,7 @@ static char *tokstr[] = {
   "va_start", "va_arg", "va_end",
   "cast", "const", "foreach",
   "exists", "undef", "inout", "range",
+  "funcptr",
 
   "numlit", "strlit", ";", "ident",
   "{", "}", "(", ")",

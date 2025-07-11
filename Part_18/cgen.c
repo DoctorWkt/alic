@@ -83,7 +83,7 @@ static char *qbetype(Type * type) {
 static char *qbe_storetype(Type * type) {
   int kind = type->kind;
 
-  if (type->ptr_depth > 0)
+  if (is_pointer(type))
     return ("l");
   if (type->kind > TY_BOOL)
     fatal("%s not a built-in type\n", get_typename(type));
@@ -97,7 +97,7 @@ static char *qbe_storetype(Type * type) {
 static char *qbe_loadtype(Type * type) {
   int kind = type->kind;
 
-  if (type->ptr_depth > 0)
+  if (is_pointer(type))
     return ("l");
   if (type->kind > TY_BOOL)
     fatal("%s not a built-in type\n", get_typename(type));
@@ -131,7 +131,7 @@ int cgalign(Type * ty, int offset) {
   int alignment = 1;
 
   // Pointers are 8-byte aligned
-  if (ty->ptr_depth > 0)
+  if (is_pointer(ty))
     alignment = 8;
   else {
     // Structs: use the type of the first member
@@ -527,6 +527,15 @@ int cgloadvar(Sym * sym) {
     return(t);
   }
 
+  // If it's a function pointer, copy or load it
+  if (sym->type->kind == TY_FUNCPTR) {
+    if (sym->has_addr==true)
+      fprintf(Outfh, "  %%.t%d =l load %c%s\n", t, qbeprefix, sym->name);
+    else
+      fprintf(Outfh, "  %%.t%d =l copy %c%s\n", t, qbeprefix, sym->name);
+    return(t);
+  }
+
   // Get the matching QBE type
   char *qloadtype = qbe_loadtype(ty);
   char *qtype = qbetype(ty);
@@ -572,6 +581,10 @@ void cgrangecheck(int t, Type *ty, int funcname) {
 int cgstorvar(int t, Type * exprtype, Sym * sym) {
   char qbeprefix = (sym->visibility == SV_LOCAL) ? '%' : '$';
   Type *ty= sym->type;
+
+  // If it's a function pointer, change the type
+  if (sym->type->kind == TY_FUNCPTR)
+    ty= ty_voidptr;
 
   // Get the matching QBE type
   char *qtype = qbe_storetype(ty);

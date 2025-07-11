@@ -298,7 +298,7 @@ type Keynode= struct {
 };
 
 // List of keywords and matching tokens
-Keynode keylist[48] = {
+Keynode keylist[49] = {
   {'N', "NULL", T_NULL},
   {'a', "abort", T_ABORT},
   {'b', "bool", T_BOOL},
@@ -319,6 +319,7 @@ Keynode keylist[48] = {
   {'f', "flt64", T_FLT64},
   {'f', "for", T_FOR},
   {'f', "foreach", T_FOREACH},
+  {'f', "funcptr", T_FUNCPTR},
   {'i', "if", T_IF},
   {'i', "inout", T_INOUT},
   {'i', "int8", T_INT8},
@@ -556,7 +557,7 @@ public bool scan(inout Token t) {
 }
 
 // List of tokens as strings
-char *tokstr[86] = {
+char *tokstr[87] = {
   "EOF",
 
   "&", "|", "^",
@@ -581,6 +582,7 @@ char *tokstr[86] = {
   "va_start", "va_arg", "va_end",
   "cast", "const", "foreach",
   "exists", "undef", "inout", "range",
+  "funcptr",
 
   "numlit", "strlit", ";", "ident",
   "{", "}", "(", ")",

@@ -14,33 +14,33 @@
 public bool add_function(const ASTnode * func,
 		ASTnode * paramlist, const int visibility) {
   Sym *this;
-  Sym *funcptr;
+  Sym *funcpointer;
   int paramcnt = 0;
 
   // Try to add the function to the symbol table
-  funcptr = add_symbol(func.strlit, ST_FUNCTION, func.ty, visibility);
+  funcpointer = add_symbol(func.strlit, ST_FUNCTION, func.ty, visibility);
 
   // The function already exists
-  if (funcptr == NULL) {
+  if (funcpointer == NULL) {
     // Find the existing prototype
-    funcptr = find_symbol(func.strlit);
+    funcpointer = find_symbol(func.strlit);
 
     // Check the return type
-    if (func.ty != funcptr.ty)
+    if (func.ty != funcpointer.ty)
       fatal("%s() declaration has different type than previous: %s vs %s\n",
 	    func.strlit, get_typename(func.ty),
-	    get_typename(funcptr.ty));
+	    get_typename(funcpointer.ty));
 
     // Check that the exception handling marker for
     // the prototype and the real function are the same
-    if (((funcptr.exceptvar != NULL) && (func.sym == NULL)) ||
-	((funcptr.exceptvar == NULL) && (func.sym != NULL)))
+    if (((funcpointer.exceptvar != NULL) && (func.sym == NULL)) ||
+	((funcpointer.exceptvar == NULL) && (func.sym != NULL)))
       fatal("%s(): inconsistent exception handling cf. prototype\n",
 	    func.strlit);
 
     // Walk both the paramlist and the member list 
     // in this to verify both lists are the same
-    this = funcptr.paramlist;
+    this = funcpointer.paramlist;
     while (true) {
       // No remaining parameters
       if (this == NULL && paramlist == NULL)
@@ -77,17 +77,17 @@ public bool add_function(const ASTnode * func,
 
     // All OK. Return if it was previously
     // declared with a statement block.
-    return (funcptr.has_block);
+    return (funcpointer.has_block);
   }
 
   // The function is a new one. Walk the parmlist adding
   // each name and type to the function's member list
   for (; paramlist != NULL; paramlist = paramlist.mid) {
-    this = add_sym_to(funcptr.paramlist, paramlist.strlit,
+    this = add_sym_to(funcpointer.paramlist, paramlist.strlit,
 		      ST_VARIABLE, paramlist.ty);
     if (this == NULL)
       fatal("Multiple parameters named %s in %s()\n",
-	    paramlist.strlit, funcptr.name);
+	    paramlist.strlit, funcpointer.name);
     this.has_block = false;
     this.visibility = SV_LOCAL;
     this.is_const= paramlist.is_const;
@@ -108,13 +108,13 @@ public bool add_function(const ASTnode * func,
   // Set the number of function parameters, and
   // mark it as a variadic function if needed
   if (func.is_variadic == true)
-    funcptr.is_variadic = true;
-  funcptr.count = paramcnt;
+    funcpointer.is_variadic = true;
+  funcpointer.count = paramcnt;
 
   // If the function throws an exception, copy
   // the pointer to the exception variable over
   if (func.sym != NULL)
-    funcptr.exceptvar = func.sym;
+    funcpointer.exceptvar = func.sym;
 
   // No statement block as yet
   return (false);

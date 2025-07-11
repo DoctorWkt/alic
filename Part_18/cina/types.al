@@ -6,14 +6,14 @@
 #include "proto.ah"
 
 // A list of minimums per type, signed followed by unsigned
-public const int64 typemin[8]= {
+public const int64 typemin[8] = {
   INT8_MIN, INT16_MIN, INT32_MIN, INT64_MIN, 0, 0, 0, 0
 };
 
 // A list of maximumx per type, signed followed by unsigned.
 // We don't use the uint64 type value, so it is zero
-public const int64 typemax[8]= {
-  INT8_MAX,  INT16_MAX,  INT32_MAX,  INT64_MAX,
+public const int64 typemax[8] = {
+  INT8_MAX, INT16_MAX, INT32_MAX, INT64_MAX,
   UINT8_MAX, UINT16_MAX, UINT32_MAX, 0
 };
 
@@ -21,25 +21,39 @@ public const int64 typemax[8]= {
 // in alic, we make Type variables and then get
 // pointers to them
 
-Type tystr_void  = { TY_VOID, 1, false, 0, NULL, NULL, 0, 0, NULL, NULL };
-Type tystr_bool  = { TY_BOOL, 1, false, 0, NULL, NULL, 0, 0, NULL, NULL };
+Type tystr_void =
+  { TY_VOID, 1, false, 0, NULL, NULL, 0, 0, NULL, NULL, NULL, false, NULL };
+Type tystr_bool =
+  { TY_BOOL, 1, false, 0, NULL, NULL, 0, 0, NULL, NULL, NULL, false, NULL };
 
-Type tystr_int8  = { TY_INT8,  1, false, 0, NULL, NULL, 0, 0, NULL, NULL };
-Type tystr_int16 = { TY_INT16, 2, false, 0, NULL, NULL, 0, 0, NULL, NULL };
-Type tystr_int32 = { TY_INT32, 4, false, 0, NULL, NULL, 0, 0, NULL, NULL };
-Type tystr_int64 = { TY_INT64, 8, false, 0, NULL, NULL, 0, 0, NULL, NULL };
+Type tystr_int8 =
+  { TY_INT8, 1, false, 0, NULL, NULL, 0, 0, NULL, NULL, NULL, false, NULL };
+Type tystr_int16 =
+  { TY_INT16, 2, false, 0, NULL, NULL, 0, 0, NULL, NULL, NULL, false, NULL };
+Type tystr_int32 =
+  { TY_INT32, 4, false, 0, NULL, NULL, 0, 0, NULL, NULL, NULL, false, NULL };
+Type tystr_int64 =
+  { TY_INT64, 8, false, 0, NULL, NULL, 0, 0, NULL, NULL, NULL, false, NULL };
 
-Type tystr_uint8 =  { TY_INT8,  1, true, 0, NULL, NULL, 0, 0, NULL, NULL };
-Type tystr_uint16 = { TY_INT16, 2, true, 0, NULL, NULL, 0, 0, NULL, NULL };
-Type tystr_uint32 = { TY_INT32, 4, true, 0, NULL, NULL, 0, 0, NULL, NULL };
-Type tystr_uint64 = { TY_INT64, 8, true, 0, NULL, NULL, 0, 0, NULL, NULL };
+Type tystr_uint8 =
+  { TY_INT8, 1, true, 0, NULL, NULL, 0, 0, NULL, NULL, NULL, false, NULL };
+Type tystr_uint16 =
+  { TY_INT16, 2, true, 0, NULL, NULL, 0, 0, NULL, NULL, NULL, false, NULL };
+Type tystr_uint32 =
+  { TY_INT32, 4, true, 0, NULL, NULL, 0, 0, NULL, NULL, NULL, false, NULL };
+Type tystr_uint64 =
+  { TY_INT64, 8, true, 0, NULL, NULL, 0, 0, NULL, NULL, NULL, false, NULL };
 
-Type tystr_flt32 = { TY_FLT32, 4, false, 0, NULL, NULL, 0, 0, NULL, NULL };
-Type tystr_flt64 = { TY_FLT64, 8, false, 0, NULL, NULL, 0, 0, NULL, NULL };
+Type tystr_flt32 =
+  { TY_FLT32, 4, false, 0, NULL, NULL, 0, 0, NULL, NULL, NULL, false, NULL };
+Type tystr_flt64 =
+  { TY_FLT64, 8, false, 0, NULL, NULL, 0, 0, NULL, NULL, NULL, false, NULL };
 
 // voidptr used by NULL, int8ptr used by strlits
-Type tystr_voidptr = { TY_VOID, 8, false, 1, NULL, NULL, 0, 0, NULL, NULL };
-Type tystr_int8ptr = { TY_INT8, 8, false, 1, NULL, NULL, 0, 0, NULL, NULL };
+Type tystr_voidptr =
+  { TY_VOID, 8, false, 1, NULL, NULL, 0, 0, NULL, NULL, NULL, false, NULL };
+Type tystr_int8ptr =
+  { TY_INT8, 8, false, 1, NULL, NULL, 0, 0, NULL, NULL, NULL, false, NULL };
 
 
 // Global variables
@@ -65,18 +79,18 @@ public Type *ty_int8ptr;
 
 // Initialise the type list with the built-in types
 public void init_typelist(void) {
-  ty_void    = &tystr_void;
-  ty_bool    = &tystr_bool;
-  ty_int8    = &tystr_int8;
-  ty_int16   = &tystr_int16;
-  ty_int32   = &tystr_int32;
-  ty_int64   = &tystr_int64;
-  ty_uint8   = &tystr_uint8;
-  ty_uint16  = &tystr_uint16;
-  ty_uint32  = &tystr_uint32;
-  ty_uint64  = &tystr_uint64;
-  ty_flt32   = &tystr_flt32;
-  ty_flt64   = &tystr_flt64;
+  ty_void = &tystr_void;
+  ty_bool = &tystr_bool;
+  ty_int8 = &tystr_int8;
+  ty_int16 = &tystr_int16;
+  ty_int32 = &tystr_int32;
+  ty_int64 = &tystr_int64;
+  ty_uint8 = &tystr_uint8;
+  ty_uint16 = &tystr_uint16;
+  ty_uint32 = &tystr_uint32;
+  ty_uint64 = &tystr_uint64;
+  ty_flt32 = &tystr_flt32;
+  ty_flt64 = &tystr_flt64;
   ty_voidptr = &tystr_voidptr;
   ty_int8ptr = &tystr_int8ptr;
 
@@ -97,18 +111,18 @@ public void init_typelist(void) {
   ty_flt64.next = NULL;
 
   // Make the built-in linked list constant
-  ty_void    = const;
-  ty_bool    = const;
-  ty_int8    = const;
-  ty_int16   = const;
-  ty_int32   = const;
-  ty_int64   = const;
-  ty_uint8   = const;
-  ty_uint16  = const;
-  ty_uint32  = const;
-  ty_uint64  = const;
-  ty_flt32   = const;
-  ty_flt64   = const;
+  ty_void = const;
+  ty_bool = const;
+  ty_int8 = const;
+  ty_int16 = const;
+  ty_int32 = const;
+  ty_int64 = const;
+  ty_uint8 = const;
+  ty_uint16 = const;
+  ty_uint32 = const;
+  ty_uint64 = const;
+  ty_flt32 = const;
+  ty_flt64 = const;
   ty_voidptr = const;
   ty_int8ptr = const;
 }
@@ -116,23 +130,23 @@ public void init_typelist(void) {
 // Create a new Type struct and
 // add it to the list of types
 public Type *new_type(int kind, int size, bool is_unsigned,
-			int ptr_depth, char *name, Type * base) {
-  Type *ty= NULL;
+		      int ptr_depth, char *name, Type * base) {
+  Type *ty = NULL;
   Type *walktype;
-  bool newnode= false;
+  bool newnode = false;
 
   // See if this is an existing type.
   // If it is and it's not an opaque type, a problem
   if (name != NULL) {
-    ty= find_type(name, 0, false, ptr_depth);
+    ty = find_type(name, 0, false, ptr_depth);
     if ((ty != NULL) && (ty.size > 0))
-    fatal("Type %s already exists\n", name);
+      fatal("Type %s already exists\n", name);
   }
 
   // It doesn't exist, make a Type node
   if (ty == NULL) {
     ty = Calloc(sizeof(Type));
-    newnode= true;
+    newnode = true;
   }
 
   // Fill in the fields
@@ -152,11 +166,11 @@ public Type *new_type(int kind, int size, bool is_unsigned,
     // We've redefined an opaque type. Walk the
     // list of types. Find any type which points
     // to a type of this name and fill in the basetype
-    foreach walktype (Typehead, walktype.next) {
-      if ((walktype.ptr_depth > 0) && (walktype.name!=NULL) &&
-				strcmp(walktype.name, ty.name)==0) {
-	walktype.basetype= ty;
-	walktype.kind= ty.kind;
+    foreach walktype(Typehead, walktype.next) {
+      if ((walktype.ptr_depth > 0) && (walktype.name != NULL) &&
+	  strcmp(walktype.name, ty.name) == 0) {
+	walktype.basetype = ty;
+	walktype.kind = ty.kind;
       }
     }
   }
@@ -171,14 +185,14 @@ public Type *new_type(int kind, int size, bool is_unsigned,
 // relevant Type structure, or NULL if it
 // does not exist
 public Type *find_type(char *typename, int kind,
-		bool is_unsigned, int ptr_depth) {
+		       bool is_unsigned, int ptr_depth) {
   Type *this;
 
   if (typename != NULL) {
     // We have a name, so search for this name
-    foreach this (Typehead, this.next) {
+    foreach this(Typehead, this.next) {
       if (this.name != NULL && this.ptr_depth == ptr_depth
-	  && strcmp(this.name, typename)==0) {
+	  && strcmp(this.name, typename) == 0) {
 	// This type could be an alias.
 	// If so, return the base type but not when
 	// the type has a range
@@ -191,7 +205,7 @@ public Type *find_type(char *typename, int kind,
     return (NULL);
   } else {
     // Otherwise, search for the type kind
-    foreach this (Typehead, this.next) {
+    foreach this(Typehead, this.next) {
       if (this.kind == kind && this.is_unsigned == is_unsigned &&
 	  this.ptr_depth == ptr_depth)
 	return (this);
@@ -213,7 +227,7 @@ public Type *pointer_to(Type * ty) {
 
   // We didn't find one, so make one and return it.
   return (new_type(ty.kind, PTR_SIZE, ty.is_unsigned,
-		ty.ptr_depth + 1, ty.name, ty.basetype));
+		   ty.ptr_depth + 1, ty.name, ty.basetype));
 }
 
 // Given a type pointer, return a type that
@@ -231,7 +245,7 @@ public Type *value_at(Type * ty) {
 
   // We didn't find one, so make one and return it.
   return (new_type(ty.kind, PTR_SIZE, ty.is_unsigned,
-		ty.ptr_depth - 1, ty.name, ty.basetype));
+		   ty.ptr_depth - 1, ty.name, ty.basetype));
 }
 
 // Is this type an integer?
@@ -256,6 +270,8 @@ public bool is_numeric(Type * ty) {
 
 // Is this type a pointer?
 public bool is_pointer(Type * ty) {
+  if (ty.kind == TY_FUNCPTR)
+    return (true);
   return (ty.ptr_depth != 0);
 }
 
@@ -267,8 +283,7 @@ public bool is_struct(Type * ty) {
 // List of built-in types
 const char *typename[12] = {
   "int8", "int16", "int32", "int64", "flt32", "flt64",
-  "void", "bool", "unsigned int8", "unsigned int16",
-  "unsigned int32", "unsigned int64"
+  "void", "bool", "uint8", "uint16", "uint32", "uint64"
 };
 
 #define TYPELEN 255
@@ -281,16 +296,15 @@ public char *get_typename(Type * ty) {
   if (ty.name != NULL)
     strcpy(typenbuf, ty.name);
   else {
-    if (ty.is_unsigned)	// 6 is a magic number
-      strcpy(typenbuf, typename[ty.kind + 6]);
+    if (ty.is_unsigned)		// 8 is a magic number
+      strcpy(typenbuf, typename[ty.kind + 8]);
     else
       strcpy(typenbuf, typename[ty.kind]);
   }
 
   if (ty.ptr_depth > 0) {
     strcat(typenbuf, " ");
-    foreach i (0 ... ty.ptr_depth - 1)
-      strcat(typenbuf, "*");
+    foreach i(0 ... ty.ptr_depth - 1) strcat(typenbuf, "*");
   }
 
   return (strdup(typenbuf));
@@ -332,46 +346,45 @@ public ASTnode *widen_type(ASTnode * node, Type * ty, int op) {
 
   // We can't widen a pointer to a non-pointer
   if (!is_pointer(ty) && is_pointer(node.ty))
-    return(NULL);
+    return (NULL);
 
   // If the ty is a pointer and the node is an integer
   if (is_pointer(ty) && is_integer(node.ty)) {
 
-    switch(op) {
-      case A_ADD:
-      case A_SUBTRACT:
-        // When we are adding or subtracting, scale the
-        // node to be size of the value at the pointer.
-        // This catches `int32 *x; x= x + 1; // Should be +4
+    switch (op) {
+    case A_ADD:
+    case A_SUBTRACT:
+      // When we are adding or subtracting, scale the
+      // node to be size of the value at the pointer.
+      // This catches `int32 *x; x= x + 1; // Should be +4
 
-        // Widen the node to be ty_uint64
-        newnode = widen_type(node, ty_uint64, 0);
-	if (newnode == NULL)
-	  fatal("Could not widen %s to be ty_uint64\n",
-			get_typename(node.ty));
-	node= newnode;
+      // Widen the node to be ty_uint64
+      newnode = widen_type(node, ty_uint64, 0);
+      if (newnode == NULL)
+	fatal("Could not widen %s to be ty_uint64\n", get_typename(node.ty));
+      node = newnode;
 
-        // Get the size of the type the pointer points at
-        at_type = value_at(ty);
-        size = at_type.size;
-        if (size == 0)
-          fatal("Cannot change a pointer to an opaque type\n");
+      // Get the size of the type the pointer points at
+      at_type = value_at(ty);
+      size = at_type.size;
+      if (size == 0)
+	fatal("Cannot change a pointer to an opaque type\n");
 
-        // Scale only when bigger than one
-        if (size > 1) {
-          node = unarop(node, A_SCALE);
-          node.litval.intval = size;
-          node.ty = ty;
-        }
-        return (node);
+      // Scale only when bigger than one
+      if (size > 1) {
+	node = unarop(node, A_SCALE);
+	node.litval.intval = size;
+	node.ty = ty;
+      }
+      return (node);
 
-      case A_ADDOFFSET:
-	// Change the node's type to be the pointer's
-        node.ty = ty;
-        return (node);
+    case A_ADDOFFSET:
+      // Change the node's type to be the pointer's
+      node.ty = ty;
+      return (node);
 
-      default:
-	fatal("Cannot mix an integer with a pointer, op %d\n", op);
+    default:
+      fatal("Cannot mix an integer with a pointer, op %d\n", op);
     }
   }
 
@@ -381,7 +394,7 @@ public ASTnode *widen_type(ASTnode * node, Type * ty, int op) {
 
   // We can't widen a float to an int
   if (is_flonum(node.ty) && is_integer(ty))
-    return(NULL);
+    return (NULL);
 
   // Change an int of any size to a float
   if (is_integer(node.ty) && is_flonum(ty)) {
@@ -395,8 +408,7 @@ public ASTnode *widen_type(ASTnode * node, Type * ty, int op) {
   // type without widening, but some rules apply
   if (node.op == A_NUMLIT) {
     // Check we're not trying to make a negative A_NUMLIT unsigned.
-    if (ty.is_unsigned && !node.ty.is_unsigned
-	&& node.litval.intval < 0)
+    if (ty.is_unsigned && !node.ty.is_unsigned && node.litval.intval < 0)
       fatal("Cannot cast negative literal value %ld to be unsigned\n",
 	    node.litval.intval);
 
@@ -473,6 +485,69 @@ Type *parse_litval(inout Litval e) {
 }
 
 // Return true if a type has a limited range
-public bool has_range(Type *ty) {
-  return(ty.lower != 0 && ty.upper != 0);
+public bool has_range(Type * ty) {
+  return (ty.lower != 0 && ty.upper != 0);
+}
+
+// Given a symbol which represents a function,
+// find and return a matching function pointer type
+Type *get_funcptr_type(Sym * sym) {
+  Type *this;
+  Sym *psym;
+  Paramtype *ptype;
+  bool params_match;
+
+  // Walk the list
+  // XXX fix foreach this (Typehead, this.next) {
+  for (this = Typehead; this != NULL; this = this.next) {
+
+    // Skip things that are not function pointers
+    if (this.kind != TY_FUNCPTR)
+      continue;
+
+    // Skip if the return types do not match
+    if (sym.ty != this.rettype)
+      continue;
+
+    // Skip if the variadic flags differ
+    if (sym.is_variadic != this.is_variadic)
+      continue;
+
+    // Now compare the parameter types
+    ptype = this.paramtype;
+    psym = sym.paramlist;
+    params_match = true;
+    while (true) {
+      // We've run out of parameters to check
+      if (ptype == NULL && psym == NULL)
+	break;
+
+      // Mismatch between number of parameters
+      if (ptype == NULL && psym != NULL) {
+	params_match = false;
+	break;
+      }
+      if (ptype != NULL && psym == NULL) {
+	params_match = false;
+	break;
+      }
+
+      // Parameter types don't match
+      if (ptype.ty != psym.ty) {
+	params_match = false;
+	break;
+      }
+
+      // They do match. Go up to the next in the list
+      ptype = ptype.next;
+      psym = psym.next;
+    }
+
+    if (params_match)
+      break;
+  }
+
+  if (this == NULL)
+    fatal("Need to declare a function pointer type to suit %s()\n", sym.name);
+  return (this);
 }

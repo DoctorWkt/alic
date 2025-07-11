@@ -145,3 +145,4 @@ public ASTnode *widen_type(ASTnode * node, Type * ty, int op);
 public void add_type(ASTnode * node);
 public Type *parse_litval(inout Litval e);
 public bool has_range(Type *ty);
+public Type *get_funcptr_type(Sym *sym);

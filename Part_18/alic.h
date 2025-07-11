@@ -15,6 +15,7 @@
 #define PTR_SIZE 8		// Pointer size in bytes
 
 typedef struct Type Type;
+typedef struct Paramtype Paramtype;
 typedef struct Litval Litval;
 typedef struct Token Token;
 typedef struct Strlit Strlit;
@@ -25,7 +26,7 @@ typedef struct ASTnode ASTnode;
 // Type kinds
 enum {
   TY_INT8, TY_INT16, TY_INT32, TY_INT64, TY_FLT32, TY_FLT64,
-  TY_VOID, TY_BOOL, TY_USER, TY_STRUCT
+  TY_VOID, TY_BOOL, TY_USER, TY_STRUCT, TY_FUNCPTR
 };
 
 // Type structure. Built-ins are kept as
@@ -41,7 +42,19 @@ struct Type {
   int64_t lower;		// For user-defined integer types, the range of
   int64_t upper;		// the type. If lower==upper==0, no range
   Sym *memb;			// List of members for structs
+  Type *rettype;		// Return type for a function pointer
+  Paramtype *paramtype;		// List of parameter types for function pointers
+  bool is_variadic;		// Is the function pointer variadic
   Type *next;
+};
+
+// When we define a function pointer type, the
+// type of each parameter is stored in this list
+struct Paramtype {
+  Type *type;			// Pointer to the parameter's type
+  bool is_const;		// Is the parameter constant
+  bool is_inout;		// Is the parameter an "inout"
+  Paramtype *next;
 };
 
 // What type of numeric data is in a Litval
@@ -90,12 +103,13 @@ enum {
   T_VASTART, T_VAARG, T_VAEND,				// 62
   T_CAST, T_CONST, T_FOREACH,				// 65
   T_EXISTS, T_UNDEF, T_INOUT, T_RANGE,			// 68
+  T_FUNCPTR,						// 72
 
   // Structural tokens
-  T_NUMLIT, T_STRLIT, T_SEMI, T_IDENT,			// 72
-  T_LBRACE, T_RBRACE, T_LPAREN, T_RPAREN,		// 76
-  T_COMMA, T_ELLIPSIS, T_DOT,				// 80
-  T_LBRACKET, T_RBRACKET, T_COLON			// 83
+  T_NUMLIT, T_STRLIT, T_SEMI, T_IDENT,			// 73
+  T_LBRACE, T_RBRACE, T_LPAREN, T_RPAREN,		// 77
+  T_COMMA, T_ELLIPSIS, T_DOT,				// 81
+  T_LBRACKET, T_RBRACKET, T_COLON			// 84
 };
 
 // Token structure

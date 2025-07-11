@@ -6,9 +6,15 @@ input_file= ( type_declaration
 
 type_declaration= TYPE IDENT SEMI
                 | TYPE IDENT ASSIGN type integer_range? SEMI
-                | TYPE IDENT ASSIGN struct_declaration SEMI
+                | TYPE IDENT ASSIGN struct_declaration  SEMI
+                | TYPE IDENT ASSIGN funcptr_declaration SEMI
 
 integer_range= RANGE NUMLIT ... NUMLIT
+
+funcptr_declaration= FUNCPTR type
+                     LPAREN type_list (COMMA ELLIPSIS)? RPAREN
+
+type_list= CONST? INOUT? type (COMMA CONST? INOUT? type)*
 
 enum_declaration= ENUM LBRACE enum_list RBRACE SEMI
 

@@ -19,6 +19,7 @@ void global_var_declaration(ASTnode * decl, int visibility);
 ASTnode *decl_initialisation(void);
 ASTnode *array_typed_declaration(void);
 ASTnode *typed_declaration(void);
+void funcptr_declaration(char *typename);
 int64 array_size(void);
 Type *assoc_keytype(void);
 Type *match_type(bool checkonly);
@@ -121,6 +122,7 @@ void input_file(void) {
 //-                 | TYPE IDENT ASSIGN type SEMI
 //-                 | TYPE IDENT ASSIGN type integer_range? SEMI
 //-                 | TYPE IDENT ASSIGN struct_declaration SEMI
+//-                 | TYPE IDENT ASSIGN funcptr_declaration SEMI
 //-
 //- integer_range= RANGE NUMLIT ... NUMLIT
 //-
@@ -149,8 +151,11 @@ void type_declaration(void) {
     // Skip the '='
     scan(Thistoken);
 
-    // If the next token is STRUCT
-    if (Thistoken.token == T_STRUCT) {
+    // We have a function pointer type
+    if (Thistoken.token == T_FUNCPTR) {
+      funcptr_declaration(typename);
+    } else if (Thistoken.token == T_STRUCT) {
+      // If the next token is STRUCT
       // Parse the struct list
       struct_declaration(typename);
     } else {
@@ -222,6 +227,95 @@ void type_declaration(void) {
 
   // Get the trailing semicolon
   semi();
+}
+
+//- funcptr_declaration= FUNCPTR type
+//-                      LPAREN type_list (COMMA ELLIPSIS)? RPAREN
+//-
+//- type_list= CONST? INOUT? type (COMMA CONST? INOUT? type)*
+//-
+Paramtype *type_list(void) {
+  Paramtype *head=NULL;
+  Paramtype *this;
+  Paramtype *last;
+  Type *ty;
+  bool is_const;
+  bool is_inout;
+
+  // Loop getting all the parameter types
+  while (true) {
+    is_const= false; is_inout= false;
+
+    // Stop if we see an ELLIPSIS
+    if (Thistoken.token == T_ELLIPSIS) break;
+
+    // See if the declaration is marked const
+    if (Thistoken.token == T_CONST) {
+      scan(Thistoken);
+      is_const= true;
+    }
+
+    // See if the declaration is marked inout
+    if (Thistoken.token == T_INOUT) {
+      scan(Thistoken);
+      is_inout= true;
+    }
+
+    // Get the type
+    ty = match_type(false);
+
+    // Build the Paramtype node
+    this= Malloc(sizeof(Paramtype));
+    this.ty= ty;
+    this.is_const= is_const;
+    this.is_inout= is_inout;
+
+    // Add it to the linked list
+    if (head==NULL) {
+      head= this; last= this;
+    } else {
+      last.next= this; last= this;
+    }
+
+    // Stop when the next token isn't a comma
+    if (Thistoken.token != T_COMMA) break;
+    scan(Thistoken);
+  }
+  
+  return(head);
+}
+
+void funcptr_declaration(char *typename) {
+  Type *ty;
+  Type *rettype;
+  Paramtype *paramtype;
+  bool is_variadic= false;
+
+  // Skip the FUNCPTR keyword.
+  // Get the return type and the '('
+  scan(Thistoken);
+  rettype = match_type(false);
+  lparen();
+
+  // Get the parameter types
+  paramtype= type_list();
+
+  // If the next token is an ELLIPSIS,
+  // the function pointer is variadic
+  if (Thistoken.token == T_ELLIPSIS) {
+    is_variadic= true;
+    scan(Thistoken);
+  }
+
+  // Add the type to the table of types
+  ty= new_type(TY_FUNCPTR, ty_voidptr.size, false, 0, typename, NULL);
+  ty.rettype= rettype;
+  ty.paramtype= paramtype;
+  ty.is_variadic= is_variadic;
+
+  // Get the ')'
+  rparen();
+  return;
 }
 
 // Parse an enumerated list. We must have at least
@@ -1928,7 +2022,8 @@ ASTnode *function_call(void) {
 
   // Get the function's Sym pointer
   sym = find_symbol(s.strlit);
-  if (sym == NULL || sym.symtype != ST_FUNCTION)
+  if (sym == NULL ||
+      (sym.symtype != ST_FUNCTION && sym.ty.kind != TY_FUNCPTR))
     fatal("Unknown function %s()\n", s.strlit);
 
   // Skip the identifier
@@ -1965,7 +2060,11 @@ ASTnode *function_call(void) {
   // Build the function call node and set its type
   s = mkastnode(A_FUNCCALL, s, NULL, e);
   s.sym= sym;
-  s.ty = sym.ty;
+  // Set the type depending in a function or function ptr
+  if (sym.ty.kind == TY_FUNCPTR)
+    s.ty = sym.ty.rettype;
+  else
+    s.ty = sym.ty;
   return (s);
 }
 
@@ -2668,10 +2767,41 @@ ASTnode *primary_expression(void) {
       fatal("Unknown symbol %s\n", Thistoken.tokstr);
     switch (sym.symtype) {
     case ST_FUNCTION:
-      f = function_call();
+      // This could be a function call or we
+      // are assigning a function's name to
+      // a function pointer. If the latter,
+      // the next token isn't a '('.
+      // Don't re-scan Peektoken if it
+      // already has a token in it
+      if (Peektoken.token==0)
+        scan(Peektoken);
+      if (Peektoken.token != T_LPAREN) {
+	// Make the IDENT node for the symbol
+	f = mkastleaf(A_IDENT, NULL, false, NULL, 0);
+	f.strlit = Thistoken.tokstr;
+
+        // Check the function exists
+	sym= find_symbol(Thistoken.tokstr);
+	if ((sym == NULL) || (sym.symtype != ST_FUNCTION))
+	  fatal("Symbol %s does not exist or is not a function\n");
+	f.sym= sym;
+	// Find a matching function pointer type for the function
+	f.ty= get_funcptr_type(sym);
+	scan(Thistoken);
+      } else {
+        // No, it must be a function call
+        f = function_call();
+      }
     case ST_VARIABLE:
-      f = postfix_variable(NULL);
-      f.is_const= sym.is_const;
+      // If this is a function pointer, look at the next token
+      if (Peektoken.token==0)
+        scan(Peektoken);
+      if (Peektoken.token == T_LPAREN) {
+	f= function_call();
+      } else {
+        f = postfix_variable(NULL);
+        f.is_const= sym.is_const;
+      }
     case ST_ENUM:
       f = mkastleaf(A_NUMLIT, sym.ty, true, NULL, sym.count);
       scan(Thistoken);

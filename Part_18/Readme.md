@@ -341,22 +341,199 @@ Tests 185 to 188 check that the runtime range check works for several integer ty
 
 I was trying to pass a function pointer to `signal()` and I realised that there was no way that I could write the prototype for `signal()` in *alic*. So I've removed all the function pointer code and I will rewrite it with function pointer types.
 
-I still don't like the C syntax for declaring function pointers. My idea so far is something like this:
+> *A few days later ...*
+
+It's done! We now have this functionality in *alic*:
+
+  * Define a function pointer type,
+  * Declare variables and function parameters of these types,
+  * Assign to function pointer variables using function names and other function pointer variables,
+  * Call a function pointer with arguments and get any return value.
+
+One thing I haven't done yet is add any exception handling ability to function pointers. I thought I'd get the above done first and add exception handling in later.
+
+## Function Pointer Types: Grammar
+
+The grammar changes to define a function pointer type are these:
 
 ```
-type sighandler_t  = funcptr void(int);
-type qsort_compare = funcptr int(const void *, const void *);
+type_declaration= TYPE IDENT SEMI
+                ...
+                | TYPE IDENT ASSIGN funcptr_declaration SEMI
+
+funcptr_declaration= FUNCPTR type
+                     LPAREN type_list (COMMA ELLIPSIS)? RPAREN
+
+type_list= CONST? INOUT? type (COMMA CONST? INOUT? type)*
 ```
 
-Then we can write the prototype:
+We have a new keyword "funcptr", so we can write type declarations like:
 
 ```
-sighandler_t signal(int signum, sighandler_t handler);
+type sighandler_t = funcptr void(int32);
 ```
 
-I'm going to leave this part of the *alic* journey incomplete and add the work on revamped function pointers here.
+which is a pointer to a function that receives an `int32` argument and returns `void`.
+
+Once we can add this type to the list of types, we can then write:
+
+```
+sighandler_t signal(int32 signum, sighandler_t handler);  // Function prototype
+sighandler_t foo;                                         // Non-local function pointer
+
+```
+
+## Data Structure Changes
+
+We need to augment the `Type` struct in [alic.h](alic.h) to have function pointer types and to hold the return and parameter types. There is a new kind of type:
+
+```
+// Type kinds
+enum {
+  TY_INT8, TY_INT16, TY_INT32, TY_INT64, TY_FLT32, TY_FLT64,
+  TY_VOID, TY_BOOL, TY_USER, TY_STRUCT, TY_FUNCPTR
+};
+```
+
+In the `Type` struct:
+
+```
+struct Type {
+  ...
+  Type *rettype;                // Return type for a function pointer
+  Paramtype *paramtype;         // List of parameter types for function pointers
+  Type *next;
+};
+
+// When we define a function pointer type, the
+// type of each parameter is stored in this list
+struct Paramtype {
+  Type *type;                   // Pointer to the parameter's type
+  bool is_const;                // Is the parameter constant
+  bool is_inout;                // Is the parameter an "inout"
+  Paramtype *next;
+};
+```
+
+The latter new struct holds the types and features of all the parameters of a function pointer type.
+
+## The Lexical and Parser Changes
+
+We have a new keyword, "funcptr", so we have the usual changes to the list of tokens in [alic.h](alic.h) and the data structures in [lexer.c](lexer.c).
+
+In [parser.c](parser.c), we have functions `type_list()` and `funcptr_declaration()` as per the new grammar rules.
+
+I won't go through `type_list()` as it is pretty straight-forward: keep reading in `T_CONST` and `T_INOUT` tokens followed by a type, add it to a new `Paramtype` linked list, and stop looping when we dont' see a following `T_COMMA`.
+
+`funcptr_declaration()` is similarly straight-forward: skip the "funcptr" keyword, get the type's name and the return type, skip the '(' token, call `type_list()` to get the parameters, skip the ')', and build a new type with all of the above information. We set the size of the type to be the same size as `ty_voidptr`, i.e. the size of a pointer.
+
+## Adding Semantics
+
+We can now declare a function pointer type, so we can now declare variables and parameters of this type. Now we need to be able to use them!
+
+One action we need is to call a function using a function pointer. This is relatively easy with this small change in `function_call()` in [parser.c](parser.c):
+
+```
+  // Build the function call node and set its type
+  s = mkastnode(A_FUNCCALL, s, NULL, e);
+  s->sym= sym;
+  // Set the type depending in a function or function ptr
+  if (sym->type->kind == TY_FUNCPTR)
+    s->type = sym->type->rettype;
+  else
+    s->type = sym->type;
+```
+
+We need to be able to get a function's start address or copy a function pointer's value, i.e. treat both as a variable and not a function; this depends on if the identifier's name is or isn't followed by a '(' token. Down in `primary_expression()`:
+
+```
+    case ST_FUNCTION:
+      // This could be a function call or we
+      // are assigning a function's name to
+      // a function pointer. If the latter,
+      // the next token isn't a '('.
+      ...
+      if (Peektoken.token != T_LPAREN) {
+        // It's not a function call.
+        // Do the work to get the function's address
+        break;
+      }
+      // No, it must be a function call
+      f = function_call();
+      break;
+    case ST_VARIABLE:
+      // If this is a function pointer, look at the next token
+      if (Peektoken.token == T_LPAREN) {
+	    f= function_call();
+      } else {
+        f = postfix_variable(NULL);
+        f->is_const= sym->is_const;
+      }
+```
+
+We can now build a suitable AST tree where we can call through function names and function pointer names, and get the start address/value of functions/function pointers. Now we need to turn it into QBE intermediate code. We move to [genast.c](genast.c).
+
+In `gen_funccall()` we now have three types of function calls: calls with arguments in the order that they are given, named arguments which can be out of order, and calls through a function pointer (whose parameter types are in a `Paramtype` list and not a `Sym` list).
+
+I've finally refactored the code and we now have a function called `fixup_argument()` which does the work of matching an argument's type against a function parameter. This gets called by all three of the above ways we can generate a function call.
+
+In `gen_funccall()`, we now have this basic structure:
+
+```
+  // Walk the expression list to count the number of arguments to the function.
+  // For function pointers, count the number of parameters.
+  // Check the arg count vs. the function parameter count.
+  // Allow more arguments if the function is variadic.
+  // Do we have a function pointer?
+  if (func->type->kind == TY_FUNCPTR) {
+     // Fix up all the arguments to match the function pointer parameter list  
+     // Do we have a named expression list?
+  } else if (n->right->op == A_ASSIGN) {
+     // Fix up all the named arguments
+  } else {
+     // No, it's only a normal expression list.
+     // Fix up each argument in turn against the function's parameter
+  }
+  ...
+```
+
+Otherwise the code is the same. There are a few things left to change in [cgen.c](cgen.c) which does the low-level QBE code generation. To start with I've changed a lot of
+
+```
+  if (type->ptr_depth > 0)  // old code, to
+  if (is_pointer(type))     // new code
+```
+
+because any `TY_FUNCPTR` type is automatically a pointer, viz:
+
+```
+// Is this type a pointer?
+bool is_pointer(Type * ty) {
+  if (ty->kind==TY_FUNCPTR) return(true);
+  return (ty->ptr_depth != 0);
+}
+```
+
+The main change is in `cgloadvar()` which loads the value of a variable into a temporary location:
+
+```
+  // If it's a function pointer, copy or load it
+  if (sym->type->kind == TY_FUNCPTR) {
+    if (sym->has_addr==true)
+      fprintf(Outfh, "  %%.t%d =l load %c%s\n", t, qbeprefix, sym->name);
+    else
+      fprintf(Outfh, "  %%.t%d =l copy %c%s\n", t, qbeprefix, sym->name);
+    return(t);
+  }
+```
+
+and there is a similar change in `cgstorvar()` to ensure a function pointer variable is treated as a pointer.
+
+Tests 177 to 179 and test 191 check that all the function pointer functionality now works.
 
 ## Conclusion and The Next Step
 
-I'll worry about that once I get function pointers working again!
+That was a good step in the *alic* journey. I've already added `inout` in several places in the  [cina/](cina/) compiler which is written in *alic*. I haven't used integers with ranges just yet, but I know they will come in handy. And I can finally use `signal()` in an *alic* program.
+
+Next up, I want to try extending *alic* to support N-dimensional arrays. Right now the grammar and compiler can only support 1-dimensional arrays. I've got an outline on paper for the sort of changes I'll need to make, but it's going to be a big step forward. I also have to worry about `sizeof()` and the array-walking `foreach` constructs along the way. No promises as to when this will drop!
 

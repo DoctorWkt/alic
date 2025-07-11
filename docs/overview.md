@@ -11,7 +11,7 @@ If I don't mention a feature here, and if you can't see it in *alic*'s [grammar 
   * Types have sizes: `int8`, `uint16`, `flt32` etc.
   * `bool` isn't an integer type. `true`, `false` and `NULL` are built in.
   * Enums are just a way of naming integer values.
-  * A nicer syntax for defining structs and unions.
+  * A nicer syntax for defining structs, unions and function pointers.
   * Built-in types can be renamed with ranges, e.g. `type age= uint8 range 0 ... 120;`. Range checking is done at runtime.
   * Assignments are *not* expressions, only statements.
   * *alic* has several `foreach` loop variants.
@@ -101,6 +101,8 @@ type String = char *;
 
 ## Integer Types with Ranges
 
+*(see [Part 18](../Part_18/Readme.md))*
+
 You can define integer types with specific ranges, e.g.
 
 ```
@@ -170,6 +172,52 @@ If you now declare a variable, then you can do this:
   var.x = 3.2;
   var.c = true;
 ```
+
+## Function Pointer Types
+
+*(see [Part 18](../Part_18/Readme.md))*
+
+*alic* allows you to define the type that a function pointer variable will hold, e.g.
+
+```
+type sighandler_t = funcptr void(int32);
+```
+
+declares that `sighandler_t` is the type of function that takes an `int32` argument and returns nothing. Once you have such a type, you can now declare function pointer variables inside functions and as non-local variables, e.g.
+
+```
+sighandler_t myhandler;
+
+public void main(void) {
+  sighandler_t another_handler;
+```
+
+You can also declare functions that receive or return function pointers , e.g.
+
+```
+extern sighandler_t signal(int32 signal, sighandler_t handler);
+```
+
+You can assign to a function pointer from another function pointer or a function, pass a function pointer as a function's argument and call through a function pointer, e.g.
+
+```
+void Abort(int32 x) {
+  printf("Aborting on signal %d\n", x);
+  exit(1);
+
+sighandler_t myhandler;
+
+public void main(void) {
+  sighandler_t another_handler;
+
+  myhandler= Abort;             // Point myhandler at Abort()
+  another_handler= myhandler;   // Copy a function pointer's value
+  signal(SIGINT, myhandler);    // Register a SIGINT handler
+  signal(SIGQUIT, Abort);       // Register a SIGQUIT handler
+
+  myhandler(23);                // Call Abort() through myhandler
+```
+
 
 ## Pointers
 
@@ -399,6 +447,8 @@ If you choose to name arguments, you must name all of them.
 
 ## Inout Function Parameters
 
+*(see [Part 18](../Part_18/Readme.md))*
+
 You can declare the parameters of a function to be "`inout`": this means that, instead of the value of the argument being copied into the parameter (i.e. [call by value](https://en.wikipedia.org/wiki/Evaluation_strategy#Call_by_value)), the argument's *address* is copied into the parameter to allow the function to modify the argument's value. This allows a function to return multiple values: its usual return value and also several `inout` parameters.
 
 Here is an example:
@@ -496,6 +546,8 @@ The aim here is to make it easier for a programmer to prevent "leakage" of symbo
 This also means that you **must** declare `main()` to be `public`!
 
 ## Arrays
+
+*(see [Part 12](../Part_12/Readme.md))*
 
 In *alic*, arrays are fixed in size. When you declare an array, you *must* give the number of elements, e.g.
 

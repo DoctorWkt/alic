@@ -198,6 +198,7 @@ bool is_numeric(Type * ty) {
 
 // Is this type a pointer?
 bool is_pointer(Type * ty) {
+  if (ty->kind==TY_FUNCPTR) return(true);
   return (ty->ptr_depth != 0);
 }
 
@@ -417,4 +418,51 @@ Type *parse_litval(Litval * e) {
 // Return true if a type has a limited range
 bool has_range(Type *ty) {
   return(ty->lower != 0 && ty->upper != 0);
+}
+
+// Given a symbol which represents a function,
+// find and return a matching function pointer type
+Type *get_funcptr_type(Sym *sym) {
+  Type *this;
+  Sym *psym;
+  Paramtype *ptype;
+  bool params_match;
+
+  // Walk the list
+  for (this = Typehead; this != NULL; this = this->next) {
+
+    // Skip things that are not function pointers
+    if (this->kind != TY_FUNCPTR) continue;
+
+    // Skip if the return types do not match
+    if (sym->type != this->rettype) continue;
+
+    // Skip if the variadic flags differ
+    if (sym->is_variadic != this->is_variadic) continue;
+
+    // Now compare the parameter types
+    ptype= this->paramtype;
+    psym= sym->paramlist;
+    params_match= true;
+    while (1) {
+      // We've run out of parameters to check
+      if (ptype == NULL && psym == NULL) break;
+
+      // Mismatch between number of parameters
+      if (ptype == NULL && psym != NULL) { params_match= false; break; }
+      if (ptype != NULL && psym == NULL) { params_match= false; break; }
+
+      // Parameter types don't match
+      if (ptype->type != psym->type) { params_match= false; break; }
+
+      // They do match. Go up to the next in the list
+      ptype= ptype->next; psym= psym->next;
+    }
+
+    if (params_match) break;
+  }
+
+  if (this==NULL)
+    fatal("Need to declare a function pointer type to suit %s()\n", sym->name);
+  return(this);
 }

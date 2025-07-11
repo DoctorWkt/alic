@@ -146,3 +146,4 @@ ASTnode *widen_type(ASTnode * node, Type * ty, int op);
 void add_type(ASTnode * node);
 Type *parse_litval(Litval * e);
 bool has_range(Type *ty);
+Type *get_funcptr_type(Sym *sym);
