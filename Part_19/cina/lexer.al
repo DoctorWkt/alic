@@ -70,12 +70,16 @@ int skip(void) {
 
 // Return the position of character c
 // in string s, or -1 if c not found
-int chrpos(char * s, int c) {
-  int i;
-  for (i = 0; s[i] != '\0'; i++)
-    if (s[i] == c)
-      return (i);
-  return (-1);
+int chrpos(string s, int c) {
+  int i=0;
+  char ch;
+
+  foreach ch (s) {
+    if (ch == c)
+      return(i);
+    i++;
+  }
+  return(-1);
 }
 
 // Read in a hexadecimal constant from the input

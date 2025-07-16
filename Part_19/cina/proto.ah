@@ -11,7 +11,7 @@ public int cgalloctemp(void);
 public void cglabel(int l);
 public void cgjump(int l);
 public int cgalign(Type * ty, int offset);
-public void cgstrlit(int label, char *val, bool is_const);
+public void cgstrlit(int label, string val, bool is_const);
 public void cg_file_preamble(void);
 public void cg_func_preamble(Sym * func);
 public void cg_func_postamble(Type * ty);

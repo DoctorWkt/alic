@@ -18,8 +18,8 @@ void cglabel(int l) {
 }
 
 // Generate a string literal
-void cgstrlit(int label, char * val, bool is_const) {
-  char *cptr;
+void cgstrlit(int label, string val, bool is_const) {
+  char ch;
 
   // Put constant string literals in the rodata section
   if (is_const)
@@ -27,9 +27,8 @@ void cgstrlit(int label, char * val, bool is_const) {
 
   fprintf(Outfh, "data $L%d = { ", label);
 
-  for (cptr = val; *cptr != 0; cptr++) {
-    fprintf(Outfh, "b %d, ", *cptr);
-  }
+  foreach ch (val)
+    fprintf(Outfh, "b %d, ", ch);
 
   fprintf(Outfh,  "b 0 }\n");
 }

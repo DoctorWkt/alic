@@ -511,8 +511,7 @@ Type *get_funcptr_type(Sym * sym) {
   bool params_match;
 
   // Walk the list
-  // XXX fix foreach this (Typehead, this.next) {
-  for (this = Typehead; this != NULL; this = this.next) {
+  foreach this (Typehead, this.next) {
 
     // Skip things that are not function pointers
     if (this.kind != TY_FUNCPTR)

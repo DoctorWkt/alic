@@ -427,7 +427,7 @@ int add_memb_to_struct(Type * strtype, ASTnode * asthead,
     // member currently in the struct
     lastmemb = strtype.memb;
     thismemb = strtype.memb;
-    for ( ; thismemb != NULL; ) {
+    while (thismemb != NULL) {
       if (strcmp(thismemb.name, astmemb.strlit)==0)
 	fatal("Duplicate member name %s in struct declaration\n",
 	      thismemb.name);
@@ -654,7 +654,7 @@ void check_bel(Sym * sym, ASTnode * list, int offset, bool is_element) {
   // Walk the list of struct members and
   // check each against the list value
   if (is_struct(ty)) {
-    for (memb = ty.memb; memb != NULL; memb = memb.next) {
+    foreach memb(ty.memb, memb.next) {
       check_bel(memb, list, offset + memb.offset, false);
       list = list.mid;
     }

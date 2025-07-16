@@ -500,7 +500,7 @@ int gen_funccall(ASTnode * n) {
 
   // For function pointers, count the number of parameters
   if (func.ty.kind == TY_FUNCPTR)
-    for (ptype= func.ty.paramtype; ptype != NULL; ptype= ptype.next)
+    foreach ptype (func.ty.paramtype, ptype.next)
       func.count++;
 
   // Check the arg count vs. the function parameter count.
@@ -523,7 +523,8 @@ int gen_funccall(ASTnode * n) {
     if (func.ty.kind == TY_FUNCPTR) {
       // Walk the parameter type list
       ptype= func.ty.paramtype;
-      for ({i = 0; this = n.right;}; this != NULL; {this = this.right; i++;}) {
+      i=0;
+      foreach this (n.right, this.right) {
 	if (this.op == A_GLUE)
 	  node = this.left;
 	else
@@ -542,6 +543,7 @@ int gen_funccall(ASTnode * n) {
 	// Move up to the next parameter type
 	if (ptype != NULL)
 	  ptype = ptype.next;
+	i++;
       }
            // Do we have a named expression list?
     } else if (n.right.op == A_ASSIGN) {
