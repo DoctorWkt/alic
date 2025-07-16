@@ -10,6 +10,7 @@ If I don't mention a feature here, and if you can't see it in *alic*'s [grammar 
 
   * Types have sizes: `int8`, `uint16`, `flt32` etc.
   * `bool` isn't an integer type. `true`, `false` and `NULL` are built in.
+  * The `string` type is a programmer's aid to reduce undefined behaviour.
   * Enums are just a way of naming integer values.
   * A nicer syntax for defining structs, unions and function pointers.
   * Built-in types can be renamed with ranges, e.g. `type age= uint8 range 0 ... 120;`. Range checking is done at runtime.
@@ -65,6 +66,32 @@ enum { a, b, c=25, d, e= -34, f, g };
 ```
 
 `a` is the constant 0, `b` is 1, `c` and `e` as shown, `d` is 26, `f` is -33 and `g` is -32.
+
+## The `string` Type
+
+In *alic*, the `string` type is a programmer's aid, like `const` (see below). The `string` type is identical to the `int8 *` type with some limitations:
+
+  * You can't modify the contents of a string with any form of dereferencing;
+  * You can't increment or decrement an existing string value; and
+  * You can't go past either end of a string using array dereferencing.
+
+Here are some examples:
+
+```
+  string str = "Hello, world!\n";           // Allowed
+  str = "Another string\n";                 // Allowed
+  printf("%s %c %c\n", str, *str, str[2]);  // Allowed
+
+  *str= 'G';                                // All of these are
+  str[3]= 'H';                              // not allowed
+  str++;
+  *str++;
+  str= str + 5;
+  printf("%c\n", str[-1]);                  // These two will cause a
+  printf("%c\n", str[1000]);                // runtime check and crash
+```
+
+If the `int8 *` type had been used instead of `string`, then all the operations above would be permitted.
 
 ## User-defined Types
 
@@ -313,7 +340,7 @@ You *can't* use `break` in a `switch` statement: see below for details.
 
 There are four flavours of `foreach` loops which are essentially syntactic sugar versions of `for` loops.
 
-The first is to iterate over array elements:
+The first flavour is to iterate over array elements:
 
 ```
   int32 list[5]= { 1, 2, 3, 4, 7 };
@@ -324,7 +351,17 @@ The first is to iterate over array elements:
     printf("%d\n", elem);
 ```
 
-The second is to iterate across an *inclusive* range of values:
+This also works to iterate across all the characters in a `string`:
+
+```
+  string fred= "Hello, world!\n";
+  int8 ch;
+
+  foreach ch (string)
+    printf("%c\n", ch);
+```
+
+The second flavour is to iterate across an *inclusive* range of values:
 
 ```
   int32 i;
@@ -334,7 +371,7 @@ The second is to iterate across an *inclusive* range of values:
     printf("%d\n", i);
 ```
 
-The third is to walk a linked list:
+The third flavour is to walk a linked list:
 
 ```
 type FOO = struct {

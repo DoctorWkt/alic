@@ -535,5 +535,5 @@ Tests 177 to 179 and test 191 check that all the function pointer functionality 
 
 That was a good step in the *alic* journey. I've already added `inout` in several places in the  [cina/](cina/) compiler which is written in *alic*. I haven't used integers with ranges just yet, but I know they will come in handy. And I can finally use `signal()` in an *alic* program.
 
-Next up, I want to try extending *alic* to support N-dimensional arrays. Right now the grammar and compiler can only support 1-dimensional arrays. I've got an outline on paper for the sort of changes I'll need to make, but it's going to be a big step forward. I also have to worry about `sizeof()` and the array-walking `foreach` constructs along the way. No promises as to when this will drop!
+Next up, I need to fix some bugs and then I'll try to add a `string` type to *alic*.
 
