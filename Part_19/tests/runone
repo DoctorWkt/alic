@@ -1,0 +1,9 @@
+#!/bin/sh
+if [ ! -f ../alic ]
+then (cd ..; make install)
+fi
+
+../alic -o bin $1 && ./bin
+rm -f bin *.[qs]
+
+exit 0
