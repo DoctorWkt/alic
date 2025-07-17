@@ -594,7 +594,7 @@ string tokstr[88] = {
   ",", "...", ".", "[", "]", ":"
 };
 
-string get_tokenstr(int token) {
+string get_tokenstr(const int token) {
   return (tokstr[token]);
 }
 

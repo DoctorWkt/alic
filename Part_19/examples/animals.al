@@ -129,7 +129,7 @@ void Read_Animals(char *animal_file) {
 
   while (fgets(buffer, MAX_LINE, f) != NULL) {
     int string_length;
-    char *string;
+    char *str;
 
     buffer[strlen(buffer) - 1] = '\0';
 
@@ -143,10 +143,10 @@ void Read_Animals(char *animal_file) {
       string_length = cast(strlen(buffer) - 1, int32);
     }
 
-    string = Alloc(string_length + 1);
-    string[0] = '\0';
-    strncat(string, buffer + 1, string_length);
-    animals[count].text = string;
+    str = Alloc(string_length + 1);
+    str[0] = '\0';
+    strncat(str, buffer + 1, string_length);
+    animals[count].text = str;
     count++;
   }
   fclose(f);
