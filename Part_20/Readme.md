@@ -240,7 +240,7 @@ export function  $main() {
 
 ## Accessing Elements in an Array
 
-This gets handled down in `postfix_variable()` in [parser.c](parser.c) once we have seen a `T_LBRACKET` token and determined we are not processing an associative array. I will cut some code out to make it easier to follow. Note that we now loop here to parse successive square brackets
+This gets handled down in `postfix_variable()` in [parser.c](parser.c) once we have seen a `T_LBRACKET` token and determined we are not processing an associative array. I will cut some code out to make it easier to follow. Note that we now loop here to parse successive square brackets.
 
 ```
   ASTnode *idx=NULL;
@@ -445,12 +445,12 @@ But you should definitely search for the word `dimsize` everywhere through the c
 To make it easier on the parsing, I've written the code so that all the initial element values in an array must be inside a single bracket element list, e.g.
 
 ```
-int16 foo[2][2][2] = { 1, 2, 3, 4, 5, 6, 7, 8};
+int16 foo[2][2][2] = { 1, 2, 3, 4, 5, 6, 7, 8 };
 ```
 
 ## Tests For Arrays
 
-The original 1-dimensional array tests work fine, and tests 209 to 212 test n-dimensional arrays. I'm sure I should add more tests in here.
+The original 1-dimensional array tests work fine; tests 209 to 212 test n-dimensional arrays. I'm sure I should add more tests in here.
 
 ## Conclusion and The Next Step
 
