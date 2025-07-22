@@ -27,7 +27,6 @@ If I don't mention a feature here, and if you can't see it in *alic*'s [grammar 
   * *alic* has exception handling, e.g. `try(foo) { <code> } catch { ... foo.errnum ... }`
   * Easy to use regular expression support, but not built in to *alic*.
   * Compatible with the C ABI.
-  * Limitation: only 1-dimensional arrays at present.
 
 ## Built-in Types
 
@@ -584,7 +583,7 @@ This also means that you **must** declare `main()` to be `public`!
 
 ## Arrays
 
-*(see [Part 12](../Part_12/Readme.md))*
+*(see [Part 20](../Part_20/Readme.md))*
 
 In *alic*, arrays are fixed in size. When you declare an array, you *must* give the number of elements, e.g.
 
@@ -609,6 +608,16 @@ type FOO = int32 fred[5];
 By default, an access into an array will be bounds checked. If the index is below zero or greater than or equal to the number of elements, the program will print an error message and `exit(1)`. You can disable this by using the `-B` compiler command-line option.
 
 If you use array access via a pointer, there is no bounds checking.
+
+## N-Dimensional Arrays
+
+*alic* supports n-dimensional arrays. For non-local arrays, you can only use a single set of `{ ... }` to initialise an array, e.g.
+
+```
+int16 foo[2][2][2] = {1, 2, 3, 4, 5, 6, 7, 8};
+```
+
+The index at each dimension is bounds check at runtime.
 
 ## Associative Arrays
 
@@ -824,9 +833,35 @@ The pseudo-function `sizeof()` is fairly similar to the C version. You can get t
 ```
 int32 fred[5]= { 3, 1, 4, 1, 5 };
   ...
-  for (i=0; i < sizeof(fred); i++)
+  for (i=0; i < sizeof(fred); i++)          // sizeof(fred) is 5 elements
     printf("fred[%d] is %d\n", i, fred[i]);
 ```
+
+For n-dimensional arrays, `sizeof()` gives you the number of elements at that depth. For example, consider:
+
+```
+  int32 ary[7][5][4];
+```
+
+  * `sizeof(ary)` is 140 elements,
+  * `sizeof(ary[x])` is 20 elements,
+  * `sizeof(ary[x][y])` is 4 elements, and
+  * `sizeof(ary[x][y][z])` is 4 bytes as it is a single element.
+
+## `foreach()` and N-Dimensional Arrays
+
+Consider:
+
+```
+int32 ary[7][5][4];
+```
+
+which has 140 elements. But if we fix one index, e.g. `ary[2]`, then this is the base of `5 * 4 == 20` elements. Thus:
+
+  * `foreach num (ary)` will iterate across 140 `int32` elements
+  * `foreach num (ary[x])` will iterate across 20 `int32` elements
+  * `foreach num (ary[x][y])` will iterate across 4 `int32` elements
+  * `foreach num (ary[x][y][z])` is illegal as this isn't an array
 
 ## Exceptions and Exception Handling
 

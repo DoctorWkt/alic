@@ -1,0 +1,20 @@
+#ifndef _UNISTD_AH
+# define _UNISTD_AH
+
+#include <sys/types.ah>
+
+void _exit(int status);
+int unlink(char *pathname);
+
+int getopt(int argc, char **argv, char *optstring);
+int access(const char *pathname, int mode);
+uint32 sleep(uint32 seconds);
+
+extern char *optarg;
+extern int optind;
+extern int opterr;
+extern int optopt;
+
+#define	R_OK	4		// Test for read permission.
+
+#endif	// _UNISTD_AH

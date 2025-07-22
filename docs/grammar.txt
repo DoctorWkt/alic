@@ -52,7 +52,7 @@ typed_declaration_list= typed_declaration (COMMA typed_declaration_list)*
 
 array_typed_declaration= typed_declaration (array_size | assoc_keytype)?
 
-array_size= LBRACKET NUMLIT RBRACKET
+array_size= (LBRACKET NUMLIT RBRACKET)+
 
 assoc_keytype= LBRACKET type RBRACKET
 
@@ -231,7 +231,7 @@ primary_expression= NUMLIT
                   | LPAREN expression RPAREN
 
 sizeof_expression= SIZEOF LPAREN type RPAREN
-                 | SIZEOF LPAREN IDENT RPAREN
+                 | SIZEOF LPAREN postfix_variable RPAREN
 
 va_arg_expression= VA_ARG LPAREN IDENT COMMA type RPAREN
 
@@ -241,5 +241,5 @@ exists_expression= EXISTS LPAREN postfix_variable RPAREN
 
 postfix_variable= IDENT
                 | postfix_variable DOT IDENT
-                | postfix_variable LBRACKET expression RBRACKET
+                | postfix_variable (LBRACKET expression RBRACKET)+
 
