@@ -251,9 +251,17 @@ public void main(void) {
 
 The C syntax for accessing a struct's member through a pointer is the '`->`' operator. This does **not** exist in *alic*. You can use the '.' operator instead.
 
-Consider the `FOO var` variable above. Let's take a pointer to it:
+Consider the `FOO var` variable below. Let's take a pointer to it:
 
 ```
+
+type FOO = struct {
+  int32 a,
+  flt32 b,
+  union { flt64 x, int16 y, bool z },
+  bool c
+};
+...
   FOO var;
   FOO *ptr;
 
@@ -393,6 +401,8 @@ FOO *Head;
 The fourth flavour of `foreach` is to call an *iterator* function and walk the list of values that it returns, e.g.
 
 ```
+extern uint32  ** factors(uint32 num);
+...
   uint32 x;
 
   foreach x (factors(60))
@@ -453,7 +463,7 @@ You can also use string (i.e. pointer to `int8`) expressions in a switch stateme
 
 ## Functions and Function Calling
 
-*alic*'s functions resemble C functions. A function can have zero or more arguments (use `void` when there are zero arguments), and it can return zero or one value. All arguments and return values have to be scalar, i.e. not structures.
+*alic*'s functions resemble C functions. A function can have zero or more arguments (use `void` when there are zero arguments), and it can return zero or one value. All arguments and return values have to be scalar, i.e. not structures, but see `inout` below.
 
 Function arguments can be expressions, so you can write:
 
@@ -611,13 +621,13 @@ If you use array access via a pointer, there is no bounds checking.
 
 ## N-Dimensional Arrays
 
-*alic* supports n-dimensional arrays. For non-local arrays, you can only use a single set of `{ ... }` to initialise an array, e.g.
+*alic* supports n-dimensional arrays. You can only use a single set of `{ ... }` to initialise an n-dimensional array, e.g.
 
 ```
 int16 foo[2][2][2] = {1, 2, 3, 4, 5, 6, 7, 8};
 ```
 
-The index at each dimension is bounds check at runtime.
+The index at each dimension is bounds checked at runtime.
 
 ## Associative Arrays
 
@@ -725,7 +735,7 @@ To reduce any undefined behaviour, any variable declaration (local or non-local)
 
 The `const` keyword can be applied to:
 
-  * non-local variable declarations (if marked `extern` or `public`, after this),
+  * non-local variable declarations (if marked `extern` or `public`, after these keywords),
   * parameter and local variable declarations,
   * before any string literals,
   * struct members in the type definition, and
