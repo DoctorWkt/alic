@@ -1,0 +1,27 @@
+#ifndef CURSES_H
+#define CURSES_H
+#include <sys/types.ah>
+
+// Just enough for the life.al example to work!
+
+#define KEY_F0		0410		/* Function keys.  Space for 64 */
+#define KEY_F(n)	(KEY_F0+(n))	/* Value of function key n */
+
+type WINDOW;
+type chtype= uint32;
+
+extern WINDOW * stdscr;
+extern int COLS;
+extern int LINES;
+
+extern int wclear (WINDOW *win);
+extern int mvwaddch (WINDOW *win, int y, int x, chtype ch);
+extern int wrefresh (WINDOW *win);
+extern WINDOW * initscr (void);
+extern int cbreak (void);
+extern void timeout (int time);
+extern int keypad (WINDOW *win, int flag);
+extern int getch (void);
+extern int curs_set (int how);
+
+#endif

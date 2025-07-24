@@ -690,7 +690,7 @@ When iterating over the values in an associative array, there is no guarantee of
 
 ## Initialising Variables
 
-For non-local variables, including arrays and structs, you can provide either a single value known at compile time, or a `{` ... `}` list of values separated by commas. If you have nested data structures, you can nest `{` ... `}`. For example:
+When declaring variables, you can provide either a single value (for scalar variables) or a `{` ... `}` list of values separated by commas (for aggregate variables). If you have nested data structures, you can nest `{` ... `}`. For example:
 
 ```
 type FOO= struct {
@@ -708,7 +708,7 @@ FOO fred[3]= {
 };
 ```
 
-For local variables, *alic* only lets you initialise scalar variables, i.e. not structs and not arrays. You can use expressions that will be evaluated at run-time. For example:
+For non-local variables, your initialisation values must be known at compile time. For local variables, you can use expressions that will be evaluated at run-time. For example:
 
 ```
 void main(void) {
@@ -987,4 +987,4 @@ In the *tests* directory in each part there are dozens of example programs which
 
 In the *examples* directory  in each part you will find some non-trivial example programs.
 
-In the *cina* directory in Parts 13 and up you will find a compiler for *alic* written in the *alic* language. It's about 7,000 lines of real-world code.
+In the *cina* directory in Parts 13 and up you will find a compiler for *alic* written in the *alic* language. It's about 8,500 lines of real-world code.
