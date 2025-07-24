@@ -714,7 +714,6 @@ For non-local variables, your initialisation values must be known at compile tim
 void main(void) {
   int32 x= 3;
   int32 y= x * 4;
-  FOO   fred;      // Cannot initialise this
 }
 ```
 
