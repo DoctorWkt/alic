@@ -9,10 +9,13 @@ type_declaration= TYPE IDENT SEMI
                 | TYPE IDENT ASSIGN struct_declaration  SEMI
                 | TYPE IDENT ASSIGN funcptr_declaration SEMI
 
-integer_range= RANGE NUMLIT ... NUMLIT
+integer_range= RANGE integer_constant ... integer_constant
+
+integer_constant= NUMLIT | ENUMVAL
 
 funcptr_declaration= FUNCPTR type
                      LPAREN type_list (COMMA ELLIPSIS)? RPAREN
+                     (THROWS type)?
 
 type_list= CONST? INOUT? type (COMMA CONST? INOUT? type)*
 
@@ -52,7 +55,7 @@ typed_declaration_list= typed_declaration (COMMA typed_declaration_list)*
 
 array_typed_declaration= typed_declaration (array_size | assoc_keytype)?
 
-array_size= (LBRACKET NUMLIT RBRACKET)+
+array_size= (LBRACKET integer_constant RBRACKET)+
 
 assoc_keytype= LBRACKET type RBRACKET
 

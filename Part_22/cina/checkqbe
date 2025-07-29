@@ -1,0 +1,29 @@
+#!/bin/sh
+#
+# Check the QBE output of alic vs. alica
+#
+
+# Build our compiler if needed
+if [ ! -f alica ]
+then make
+fi
+
+# Try to use each input source file
+for i in *.al
+do
+  qfile=`echo $i | sed 's/al$/q/'`
+  # Use the C version of the compiler
+  # and get the checksum
+  ../alic -S $i 2> /dev/null
+  csum=`cat $qfile | md5sum | sed 's/ .*//'`
+  # Now use the compiler in alic
+  ./alica -S $i 2> /dev/null
+  asum=`cat $qfile | md5sum | sed 's/ .*//'`
+  if [ "$asum" = "$csum" ]
+  then echo $i: OK
+  else echo $i: FAIL
+  fi
+done
+
+
+exit 0

@@ -1,0 +1,30 @@
+#!/bin/sh
+#
+# Compare the QBE output of alic vs. alica
+#
+if [ "$#" -ne 1 ]
+then echo "Usage: $0 file.al"; exit 1
+fi
+
+# Build our compiler if needed
+if [ ! -f ../alica ]
+then (cd ..; make)
+fi
+
+# Also ensure we have test files
+make out err test001.al > /dev/null 2> /dev/null
+
+qfile=`echo $1 | sed 's/al$/q/'`
+
+# Use the C version of the compiler
+# and get the checksum
+../../alic -S $1 2> /dev/null
+mv $qfile c.q
+
+# Now use the compiler in alic
+../alica -S $1 2> /dev/null
+mv $qfile a.q
+
+diff c.q a.q
+
+exit 0

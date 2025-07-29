@@ -199,6 +199,21 @@ If you now declare a variable, then you can do this:
   var.c = true;
 ```
 
+## Copying Structs
+
+You can do this in *alic*:
+
+```
+  FOO var;
+  FOO jim;
+
+  var.a = 5;
+  var.x = 3.2;
+  var.c = true;
+
+  jim= var;  // Copy the whole struct
+```
+
 ## Function Pointer Types
 
 *(see [Part 18](../Part_18/Readme.md))*
@@ -244,6 +259,13 @@ public void main(void) {
   myhandler(23);                // Call Abort() through myhandler
 ```
 
+Finally, you can define a function pointer type that can point at a function which throws an exception, e.g:
+
+```
+// The footype type points at a function that takes an int8 and a bool argument,
+// returns an int32 result and can throw an Exception
+type footype= funcptr int32(int8, bool) throws Exception *;
+```
 
 ## Pointers
 
@@ -700,7 +722,9 @@ When iterating over the values in an associative array, there is no guarantee of
 
 ## Initialising Variables
 
-When declaring variables, you can provide either a single value (for scalar variables) or a `{` ... `}` list of values separated by commas (for aggregate variables). If you have nested data structures, you can nest `{` ... `}`. For example:
+When declaring variables you can provide either a single value for scalar variables, or a *bracketed expression list* of values for aggregate variables. The latter is a pair of `{ ... }` with expressions or values inside. These can optionally be separated by commas; you can also use `{ ... }` inside the outermost pair to aid your visual comprehension of the expression list.
+
+For example:
 
 ```
 type FOO= struct {
@@ -716,6 +740,9 @@ FOO fred[3]= {
         { 2, false, 4.5 },
         { 3, true,  6.7 }
 };
+
+// This is also legal but harder to read
+FOO fred[3]= {1 true 1.2 2 false 4.5 3 true 6.7};
 ```
 
 For non-local variables, your initialisation values must be known at compile time. For local variables, you can use expressions that will be evaluated at run-time. For example:
@@ -727,7 +754,7 @@ void main(void) {
 }
 ```
 
-To reduce any undefined behaviour, any variable declaration (local or non-local) without an initialisation expression will be filled with zero bits.
+To reduce any undefined behaviour, any variable declaration (local or non-local) without an initialisation expression will be filled with zero bits. Initialisation expressions and values are evaluated from left to right.
 
 ## The `const` Keyword
 

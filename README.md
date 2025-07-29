@@ -39,6 +39,7 @@ Here are the parts of the *alic* journey so far:
   * [Part 19](Part_19/Readme.md): A `string` Type and Some Bug Fixes
   * [Part 20](Part_20/Readme.md): N-Dimensional Arrays
   * [Part 21](Part_21/Readme.md): Local Struct/Array Initialisation
+  * [Part 22](Part_22/Readme.md): My To-Do List
 
 If you just want to see the language features in *alic* which make it
 different than C, then skips parts 1-5 and 13 and read the other parts!

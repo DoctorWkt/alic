@@ -1,0 +1,40 @@
+#ifndef _STDIO_AH
+# define _STDIO_AH
+
+#include <sys/types.ah>
+#include <stddef.ah>
+
+#define EOF (-1)
+
+type FILE;
+
+int printf(char *fmt, ...);
+int fprintf(FILE *stream, char *fmt, ...);
+int sprintf(char *str, char *format, ...);
+int snprintf(char *str, size_t size, char *fmt, ...);
+int vfprintf(FILE *stream, char *format, ...);
+FILE *fopen(char *fmt, char *mode);
+size_t fwrite(char *ptr, size_t size, size_t nmemb, FILE *stream);
+size_t  fread(char *ptr, size_t size, size_t nmemb, FILE *stream);
+int fclose(FILE *stream);
+int fflush(FILE *stream);
+
+int sscanf(char *str, char *format, ...);
+
+FILE *popen(char *command, char *ty);
+int pclose(FILE *stream);
+
+int fgetc(FILE *stream);
+int getc(FILE *stream);
+int getchar(void);
+char *fgets(char *ptr, int size, FILE *stream);
+int ungetc(int c, FILE *stream);
+
+int fputs(char * s, FILE *stream);
+int puts(char *s);
+
+extern FILE * stdin;
+extern FILE * stdout;
+extern FILE * stderr;
+
+#endif
