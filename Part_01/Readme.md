@@ -26,7 +26,7 @@ One way to get the *alic* compiler to fit into 64K of code space is to break it 
 
 ![Compiler Phases Diagram](../docs/figs/phases.png)
 
-There are six phases to the compiler as shown, which are connected by a uni-directional flow of data (which could be a pipeline). We start with the input code in a text file and end with an assembly text file. The parser and code generator share two files, one for the global symbol table and another for the declared types. I know that, because of the number of include files that a source file can bring in, the global symbol table can get very large; it's better to keep it on disk. The table for new types may fit in memory, but I'll leave it out on disk for now. There are usually not too many local variables, so we can pass these from the parser to the code generator in the AST trees and keep them in memory.
+There are five phases to the compiler as shown, which are connected by a uni-directional flow of data (which could be a pipeline). We start with the input code in a text file and end with an assembly text file. The parser and code generator share two files, one for the global symbol table and another for the declared types. I know that, because of the number of include files that a source file can bring in, the global symbol table can get very large; it's better to keep it on disk. The table for new types may fit in memory, but I'll leave it out on disk for now. There are usually not too many local variables, so we can pass these from the parser to the code generator in the AST trees and keep them in memory.
 
 If code space really gets tight, I may have to remove some of the language features in *alic*. But I'll cross that bridge when I need to.
 
