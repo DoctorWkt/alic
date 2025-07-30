@@ -1,9 +1,0 @@
-fred.a is 1
-fred.b is 'x'
-fred.c is 1
-fred.d is 3.200000
-jim[0] is 1
-jim[1] is 2
-jim[2] is 2
-jim[3] is 2
-jim[4] is 4

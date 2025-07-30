@@ -1,7 +1,0 @@
-#ifndef SYS_TYPES_AH
-# define SYS_TYPES_AH
-
-type char = int8;
-type int  = int64;
-
-#endif

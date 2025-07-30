@@ -1,7 +1,0 @@
-#ifndef _REGEX_AH
-# define _REGEX_AH
-
-int8 *** grep(int8 *src, int8 *search);
-int8 *   sed(int8 *src, int8 *search, int8 *replace);
-
-#endif	//_REGEX_AH

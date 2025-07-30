@@ -1,8 +1,0 @@
-#include <stdio.ah>
-
-public void main(void) {
-  uint32 fred;
-  int8 *x;
-
-  fred= unsigned(x);
-}
