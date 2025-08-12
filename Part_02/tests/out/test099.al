@@ -1,0 +1,15 @@
+0 mod 7 is 0
+1 mod 7 is 1
+2 mod 7 is 2
+3 mod 7 is 3
+4 mod 7 is 4
+5 mod 7 is 5
+6 mod 7 is 6
+7 mod 7 is 0
+8 mod 7 is 1
+9 mod 7 is 2
+10 mod 7 is 3
+11 mod 7 is 4
+12 mod 7 is 5
+13 mod 7 is 6
+14 mod 7 is 0

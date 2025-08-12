@@ -5,3 +5,4 @@ Welcome to the PDP-11 branch of my *alic* journey. If you want the version of th
 Here are the parts of the PDP-11 *alic* journey so far:
 
   * [Part 1](Part_01/Readme.md): Goals, Issues and a Roadmap
+  * [Part 2](Part_02/Readme.md): An Intermediate Language

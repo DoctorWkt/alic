@@ -1,0 +1,6 @@
+#ifndef _STDDEF_AH
+# define _STDDEF_AH
+
+type size_t = int64;
+
+#endif	//_STDDEF_AH

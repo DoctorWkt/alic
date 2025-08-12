@@ -4,7 +4,7 @@ The *alic* language was inspired by C, and I've tried to make *alic* an "improve
 
 Dennis Ritchie [wrote the first C compiler on the PDP-11 platform](https://www.nokia.com/bell-labs/about/dennis-m-ritchie/chist.html). Given that *alic* is an "improved" C, I thought it would be fun(!) to port *alic* to the PDP-11 platform.
 
-OK, this isn't going to be easy at all, as the PDP-11 is a 16-bit architecture with a lot less memory than the 64-bit platforms that *alic* currently runs on. I'm going to target the [PDP-11/70](https://gunkies.org/wiki/PDP-11/70) as it provides each program with 64K of instruction space as well as 64K of code space (so-called "split I&D" memory).
+OK, this isn't going to be easy at all, as the PDP-11 is a 16-bit architecture with a lot less memory than the 64-bit platforms that *alic* currently runs on. I'm going to target the [PDP-11/70](https://gunkies.org/wiki/PDP-11/70) as it provides each program with 64K of instruction space as well as 64K of data space (so-called "split I&D" memory).
 
 The [Open SIMH](https://opensimh.org/) simulator can run [2.11BSD](https://minnie.tuhs.org/cgi-bin/utree.pl?file=2.11BSD) on a simulated PDP-11/70 with a C compiler and some debugging tools. This is going to be the simulated operating system and hardware platform that I will aim to get *alic* to run on.
 
@@ -22,13 +22,29 @@ Unlike the 6809, the PDP-11/70 has a diverse range of instructions, so I don't t
 
 ## Reducing the Code Size
 
-One way to get the *alic* compiler to fit into 64K of code space is to break it up into several separate programs. My vision, at present, looks something like this:
+One way to get the *alic* compiler to fit into 64K of code space on the PDP-11 is to break it up into several separate programs. The compiler, at present, has this flow of data:
 
 ![Compiler Phases Diagram](../docs/figs/phases.png)
 
-There are five phases to the compiler as shown, which are connected by a uni-directional flow of data (which could be a pipeline). We start with the input code in a text file and end with an assembly text file. The parser and code generator share two files, one for the global symbol table and another for the declared types. I know that, because of the number of include files that a source file can bring in, the global symbol table can get very large; it's better to keep it on disk. The table for new types may fit in memory, but I'll leave it out on disk for now. There are usually not too many local variables, so we can pass these from the parser to the code generator in the AST trees and keep them in memory.
+The C pre-processor reads in the input file (and any included header files), expands macros and outputs a new textual representation of the input file.
 
-If code space really gets tight, I may have to remove some of the language features in *alic*. But I'll cross that bridge when I need to.
+The lexer (in [lexer.c](lexer.c)) reads from the pre-processor and produces a set of lexical *tokens*.
+
+The parser (in [parser.c](parser.c)) reads the token stream and produces a set of AST trees, one per function. As well, when new types and symbols are declared, the parser adds these to the table of types and the symbol table. The parser also does some semantic analysis on the input.
+
+The AST trees are passed to the AST walker in [genast.c](genast.c). More semantic analysis is done here, and the AST operations are converted via one or more code generator function calls (in [cgen.c](cgen.c)) into QBE code.
+
+This QBE code is then read in from the external `qbe` program which translates and optimises the QBE code into assembly code; this is the final output of the compiler.
+
+At present, the compiler has the lexer, parser, AST walker and code generator all in the one executable, as well as the code for the type and symbol tables. But it doesn't have to be this way.
+
+The solid arrows show a uni-directional flow of data. If we can serialise this data flow, we can separate either side into a separate program and join them either with temporary files or pipes. For example, it's easy to get the lexer to serialise tokens: I've done it before in the 6809 version of the *acwj* compiler. What isn't easy is to serialise the AST trees that pass between the parser and the AST tree walker. Yes, I've also done this before in the 6809 version of the *acwj* compiler. It was very ugly and very slow. I'd rather not do it again if I can avoid it. We also have to keep the type and symbol tables on disk.
+
+Another place that we can serialise the data flow is the set of function calls between the AST tree walker and the code generator.
+
+So I've got a few places where I can chop up the existing compiler and make it into separate programs. It all depends on how much of the existing compiler will fit into a PDP-11 executable!
+
+And if code space really gets tight, I may have to remove some of the language features in *alic*. But I'll cross that bridge when I need to.
 
 ## Reducing the Data Size
 
@@ -48,12 +64,11 @@ I am definitely going to have to completely replace the QBE code generation in `
 
 Based on the above, here is what I think will be my major steps:
 
-  * Keep the QBE backend and break the existing compiler in C up into the phases shown above. Ensure that it still passes all the tests.
-  * Put this compiler on a "data diet": add `free()`s where I can, put struct members into unions etc. Where I can, try to start using 16-bit and 32-bit integers instead of 64-bit integers. Ensure that it still passes all the tests. Write tools to dump the token stream from the lexer, the AST trees from the parser, and the type & symbol tables.
+  * Keep the QBE backend and break the existing compiler in C up into several separate executables. Ensure that it still passes all the tests.
+  * Put this compiler on a "data diet": add `free()`s where I can, put struct members into unions etc. Where I can, try to start using 16-bit and 32-bit integers instead of 64-bit integers. Ensure that it still passes all the tests.
 
 I'll do this on my existing Devuan Linux platform where I have a good set of debugging tools. Next up:
 
-  * One at a time, get each phase to compile on the PDP-11 and verify that its output matches that of the compiler on the Devuan Linux platform.
   * On the Devuan Linux platform, rewrite the code generator to produce PDP-11 assembly code. Use a PDP-11 simulator to check that the assembly code that is produced is correct.
   * Bring in a peephole optimiser and write a lot of rules to help produce reasonably optimised assembly code output. Ensure that the comiler passes all the tests.
   * Finally, rewrite this new compiler in the *alic* language and get it to self-compile on the PDP-11 platform.
@@ -62,4 +77,4 @@ I'll do this on my existing Devuan Linux platform where I have a good set of deb
 
 So that's my plan of attack. It's going to take quite a while to achieve!
 
-The next step is to start breaking the existing compiler up into several phases. That will mean working out how to serialise AST trees!
+The next step is to start breaking the existing compiler up into several phases.

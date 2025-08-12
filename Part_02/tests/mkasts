@@ -1,0 +1,6 @@
+#!/bin/sh
+for i in *.al
+do ast=`echo $i | sed 's/\.al/.ast/'`
+   ../alic -S -D$ast -Last $i
+done
+rm -f *.s *.q
